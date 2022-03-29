@@ -3,6 +3,8 @@
 
 This is a community project to develop a Doom-like fantasy RPG dungeon crawler using [MiniScript](https://miniscript.org/) and [Mini Micro](https://miniscript.org/MiniMicro).
 
+![Fairly current screen shot](notes/note-pics/ReadMeShot.png)
+
 ## Getting Started
 
 1. Clone (or better yet, fork and then clone) this repo to your local hard drive.
