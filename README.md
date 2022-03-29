@@ -10,4 +10,4 @@ This is a community project to develop a Doom-like fantasy RPG dungeon crawler u
 3. `cd "code"`
 4. `reset; load "demo1"; run`
 
-This will run the current demo.  From there you can navigate around the scene using the arrow keys (with option-left/right to strafe).  Note that you can walk right through walls, except for the outermost walls of the maze.
+This will run the current demo.  From there you can navigate around the scene using the arrow or WASD keys, plus either mouse or Q/E to rotate.

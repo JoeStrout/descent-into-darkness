@@ -44,9 +44,46 @@ gfx.fillRect 0, 320, 960, 320, color.gray	// ceiling
 
 text.color = color.white
 
+// Limit the camera movement so that it does not pass through
+// walls (or other obstacles).  We're given the old position
+// of the camera; read and update camera.pos so that it does
+// not get too close to (or cross through) any wall.
+limitCameraMovement = function(oldPos)
+	oldCol = floor(oldPos[0])
+	oldRow = floor(oldPos[1])
+	cell = grid[oldCol][oldRow]
+	if camera.pos[0] > oldPos[0] and cell.walls[dirE] then
+		camera.pos[0] = mathUtil.clamp(camera.pos[0], 0, oldCol+0.75)
+	else if camera.pos[0] < oldPos[0] and cell.walls[dirW] then
+		camera.pos[0] = mathUtil.clamp(camera.pos[0], oldCol+0.25, 99999)
+	end if
+	if camera.pos[1] > oldPos[1] and cell.walls[dirN] then
+		camera.pos[1] = mathUtil.clamp(camera.pos[1], 0, oldRow+0.75)
+	else if camera.pos[1] < oldPos[1] and cell.walls[dirS] then
+		camera.pos[1] = mathUtil.clamp(camera.pos[1], oldRow+0.25, 99999)
+	end if
+	// Also check the new cell, in case we've snuck into it sideways
+	// and are now too close to a wall.
+	newCol = floor(camera.pos[0])
+	newRow = floor(camera.pos[1])
+	cell = grid[newCol][newRow]
+	if camera.pos[0] < newCol + 0.25 and cell.walls[dirW] then
+		camera.pos[0] = newCol + 0.25
+	else if camera.pos[0] > newCol + 0.75 and cell.walls[dirE] then
+		camera.pos[0] = newCol + 0.75
+	end if
+	if camera.pos[1] < newRow + 0.25 and cell.walls[dirS] then
+		camera.pos[1] = newRow + 0.25
+	else if camera.pos[1] > newRow + 0.75 and cell.walls[dirN] then
+		camera.pos[1] = newRow + 0.75
+	end if
+	
+end function
+
 handleInputs = function
 	hInput = key.axis("Horizontal")
 	vInput = key.axis("Vertical")
+	prevPos = camera.pos[:]
 	camera.moveRight 0.1 * hInput
 	camera.moveForward 0.1 * vInput
 	if key.pressed("q") then
@@ -56,7 +93,7 @@ handleInputs = function
 	end if
 	mouseX = key.axis("Mouse X")
 	if mouseX != 0 then camera.turn -5 * mouseX
-	
+	if vInput or hInput then limitCameraMovement prevPos
 end function
 
 // enter the main loop
