@@ -16,6 +16,8 @@ TestLevel.init = function
 	self.addDoubleSidedWall [14, 2], [11, 2]
 	self.addDoubleSidedWall [14, 2], [14, 5]
 	self.addDoubleSidedWall [15, 5], [15, 1]
+	
+	Cell.fixCorners self.cells
 end function
 
 

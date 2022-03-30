@@ -6,9 +6,11 @@
 _levelClassByDepth = []
 
 _levelClassByDepth.push "TestLevel"		// Town
+_levelClassByDepth.push "MazeLevel"		// Dungeon level 1
+
 // ToDo: explicitly (or pseudo-randomly) assign a level type 
 // to each of the 32 dungeon levels.  For now, they're all just this:
-for i in range(1, 32)
+while _levelClassByDepth.len < 33
 	_levelClassByDepth.push "TestLevel"
 end for
 _levelClassByDepth.push "TestLevel"		// test level

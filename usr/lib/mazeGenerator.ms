@@ -186,15 +186,23 @@ placePainter1 = function
 	end if
 end function
 
+
+init = function(rows=9, cols=9)
+	outer.kRows = rows
+	outer.kCols = cols
+	outer.painterX = [0,0]
+	outer.painterY = [0,0]
+end function
+
 // generate: make a new maze!  This is the main entry point.
-// Call this to make a maze.
-generate = function
+// Call this (after init) to make a maze.
+generate = function(symmetry = null)
 	// reset our data: all walls in place, no crumbs.
 	outer.wall = list.init3d(kCols, kRows, 2, 1)
 	outer.breadcrumbs = list.init2d(kCols, kRows)
 	
 	// Place the pointers and assign our symmetry type.
-	outer.symmetry = floor(4 * rnd)
+	if symmetry == null then outer.symmetry = floor(4 * rnd) else outer.symmetry = symmetry
 	pickStartPos
 	placePainter1
 	breadcrumbs[painterX[0]][painterY[0]] = Direction.make(0,0) // special start indicator
@@ -223,19 +231,7 @@ generate = function
 			print "Too much moving!"
 			return
 		end if
-	end while
-	
-	// Now knock out some random additional walls.
-//	for i in range(0, 10)
-//		while true
-//			col = floor(rnd * kCols)
-//			row = floor(rnd * kCols)
-//			which = floor(rnd * 2)
-//			if wall[col][row][which] then break
-//		end while
-//		wall[col][row][which] = false
-//		if debug then debugDraw		
-//	end for
+	end while	
 end function
 
 // Report whether the indicated wall should be in the maze.
@@ -247,6 +243,7 @@ end function
 
 if locals == globals then
 	debug = true
+	init
 	clear
 	generate
 end if
