@@ -6,6 +6,6 @@ This file lists near-term things-to-do that involve writing new code (or maybe r
 - add "pit" decoration (draws a pit/ladder leading down)
 - enable traveling between levels
 - fix occasional failure of walls to join properly at an inside corner
-- fix occasional failure of renderer to draw some distant geometry off to the side of a near occluder
+- fix occasional failure of renderer to draw some distant geometry off to the side of a nearby occluder
 
 

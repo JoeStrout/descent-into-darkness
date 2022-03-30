@@ -16,14 +16,21 @@ This file lists artwork-related tasks that need to be done.
 	- sewer floor/ceiling decorations
 
 - Mobs wanted
+	- crawling bug
+	- jumping bug
+	- flying bug
 	- giant rat
 	- giant leech
 	- grey ooze
 	- gelatinous cube(?)
 
 - NPCs wanted
-	- Mayor
+	- Mayor (or whatever noble would be in charge of a small walled town)
 	- Shopkeeper
 	- Wizard
 	- Town Guard
 	- Townsfolk (x5)
+
+- UI elements needed
+	- compass (background, needle, needle shadow)
+	

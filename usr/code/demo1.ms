@@ -39,8 +39,9 @@ end function
 prepareLevel
 
 // draw the floor and ceiling
-gfx.fillRect 0, 0, 960, 320, color.silver	// floor
-gfx.fillRect 0, 320, 960, 320, color.gray	// ceiling
+gfx.clear color.gray, 960, 960
+gfx.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
+gfx.scrollY = 160
 
 text.color = color.white
 
@@ -110,3 +111,5 @@ while true
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
 	   "  Angle: " + round(camera.angle) + "     "
 end while
+key.clear
+text.row = 2

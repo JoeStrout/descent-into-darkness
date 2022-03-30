@@ -324,20 +324,19 @@ Wall.sprite = null
 Wall.make = function(left, right)
 	w = new Wall
 	w.p = [left, right]
+	if left[0] == right[0] then w.tint = "#CCCCCC" else w.tint = "#FFFFFF"
 	w.sprite = new Sprite
-	w.sprite.tint = rgb(100+155*rnd, 100+155*rnd, 100+155*rnd)
 	if mathUtil.distance(left, right) < 0.25 then
 		if rnd < 0.5 then w.sprite.image = w.imageAshort else w.sprite.image = w.imageBshort
 	else
 		if rnd < 0.5 then w.sprite.image = w.imageA else w.sprite.image = w.imageB
 	end if
-	//if left[0] == right[0] then w.sprite.tint = "#CCCCCC"
 	return w
 end function
 
 Wall.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	gfx.line left + self.p[0][0]*scaleX, bottom + self.p[0][1]*scaleY,
-			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.sprite.tint
+			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.tint
 end function
 
 // Call this method when a wall extends beyond the left end of the screen.
@@ -433,6 +432,15 @@ Wall.positionSprite = function
 	h1 = 300 * self.invD1
 	sp.setCorners [[self.x0, sp.y-h0], [self.x1, sp.y-h1], 
 	  [self.x1, sp.y+h1], [self.x0, sp.y+h0]]
+	  
+	// darken the sprite in the distance
+	avgInvD = (self.invD0 + self.invD1)*0.5
+	if avgInvD > 1 then
+		sp.tint = self.tint
+	else
+		sp.tint = color.lerp(self.tint, "#000000", (1 - avgInvD)^5)
+	end if
+	sp.avgInvD = avgInvD
 end function
 
 Wall.render = function(spriteList)
