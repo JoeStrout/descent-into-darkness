@@ -787,14 +787,7 @@ end function
 demo = function(makeMap=false)
 	if makeMap then makeDemoMap
 	clear
-	
-//	for cells in Renderer.cell
-//		for c in cells
-//			c.drawInMap 0, 0, 32, 32
-//		end for
-//	end for
-	//exit
-	
+
 	gfx.fillRect 0, 0, 960, 320, color.silver	// floor
 	gfx.fillRect 0, 320, 960, 320, color.gray	// ceiling
 	

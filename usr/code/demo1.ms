@@ -16,7 +16,7 @@ prepareLevel = function
 	Renderer.cell = Cell.make2dArray(mazeGenerator.kCols, mazeGenerator.kRows)
 	globals.grid = Renderer.cell
 
-	microstein.makeInwardBox(0, 0, mazeGenerator.kCols, mazeGenerator.kRows)
+	microstein.makeInwardBox 0, 0, mazeGenerator.kCols, mazeGenerator.kRows
 
 	for col in range(0, mazeGenerator.kCols-1)
 		for row in range(0, mazeGenerator.kRows-1)
