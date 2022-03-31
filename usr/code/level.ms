@@ -10,7 +10,7 @@ import "miscUtil"
 ensureImport "microstein"
 ensureImport "qa"
 
-for identifier in "Renderer camera Cell Wall Decoration dirN dirE dirS dirW dirDx dirDy".split
+for identifier in "Renderer camera Cell Wall Decoration FlatDecal dirN dirE dirS dirW dirDx dirDy".split
 	globals[identifier] = microstein[identifier]
 end for
 

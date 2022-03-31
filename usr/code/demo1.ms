@@ -8,7 +8,7 @@ for identifier in "Renderer camera Cell Wall Decoration dirN dirE dirS dirW dirD
 end for
 
 clear
-lvl = levels.get(1)
+lvl = levels.get(-1)
 Renderer.cell = lvl.cells
 
 // draw the floor and ceiling

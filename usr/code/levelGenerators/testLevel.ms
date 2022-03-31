@@ -4,7 +4,7 @@
 import "miscUtil"
 ensureImport "level"
 
-TestDec = new Decoration
+TestDec = new FlatDecal
 TestDec.make = function(cell, scale=1)
 	dec = new TestDec
 	dec.image = file.loadImage("/usr/content/textures/floorCobble1.png")
@@ -45,9 +45,15 @@ TestLevel.init = function
 	self.addDoubleSidedWall [14, 2], [11, 2]
 	self.addDoubleSidedWall [14, 2], [14, 5]
 	self.addDoubleSidedWall [15, 5], [15, 1]
+	self.addDoubleSidedWall [1,11], [16,11]
+	self.addDoubleSidedWall [16,11], [16,0]
 	
-	TestDec.make self.cells[3][3]
+	//TestDec.make self.cells[3][3]
+	microstein.FlatDecal.make "floorCobble1.png", self.cells[3][3]
 	
+	microstein.FlatDecal.make "shadow.png", self.cells[4][4], 0.25
+	microstein.Billboard.make "NPCs/guard.png", self.cells[4][4]
+
 	Cell.fixCorners self.cells
 end function
 
