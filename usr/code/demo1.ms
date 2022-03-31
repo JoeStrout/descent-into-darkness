@@ -1,42 +1,15 @@
-import "mazeGenerator"
 import "listUtil"
 import "mathUtil"
 import "microstein"
+import "levels"
 
 for identifier in "Renderer camera Cell Wall Decoration dirN dirE dirS dirW dirDx dirDy".split
 	globals[identifier] = microstein[identifier]
 end for
 
 clear
-
-prepareLevel = function
-	mazeGenerator.generate
-	mazeGenerator.debugDraw
-
-	Renderer.cell = Cell.make2dArray(mazeGenerator.kCols, mazeGenerator.kRows)
-	globals.grid = Renderer.cell
-
-	microstein.makeInwardBox 0, 0, mazeGenerator.kCols, mazeGenerator.kRows
-
-	for col in range(0, mazeGenerator.kCols-1)
-		for row in range(0, mazeGenerator.kRows-1)
-			if col > 0 and mazeGenerator.wall[col][row][0] then
-				// vertical wall
-				grid[col][row].addWall dirW
-				if col > 0 then grid[col-1][row].addWall dirE
-			end if
-			if row > 0 and mazeGenerator.wall[col][row][1] then
-				// horizontal wall
-				grid[col][row].addWall dirS
-				if row > 0 then grid[col][row-1].addWall dirN
-			end if		
-		end for
-	end for
-	Cell.fixCorners grid
-end function
-
-// prepare the level (maze)
-prepareLevel
+lvl = levels.get(1)
+Renderer.cell = lvl.cells
 
 // draw the floor and ceiling
 gfx.clear color.gray, 960, 960
@@ -52,7 +25,7 @@ text.color = color.white
 limitCameraMovement = function(oldPos)
 	oldCol = floor(oldPos[0])
 	oldRow = floor(oldPos[1])
-	cell = grid[oldCol][oldRow]
+	cell = lvl.cells[oldCol][oldRow]
 	if camera.pos[0] > oldPos[0] and cell.walls[dirE] then
 		camera.pos[0] = mathUtil.clamp(camera.pos[0], 0, oldCol+0.75)
 	else if camera.pos[0] < oldPos[0] and cell.walls[dirW] then
@@ -67,7 +40,7 @@ limitCameraMovement = function(oldPos)
 	// and are now too close to a wall.
 	newCol = floor(camera.pos[0])
 	newRow = floor(camera.pos[1])
-	cell = grid[newCol][newRow]
+	cell = lvl.cells[newCol][newRow]
 	if camera.pos[0] < newCol + 0.25 and cell.walls[dirW] then
 		camera.pos[0] = newCol + 0.25
 	else if camera.pos[0] > newCol + 0.75 and cell.walls[dirE] then
@@ -92,8 +65,16 @@ handleInputs = function
 	else if key.pressed("e") then
 		camera.turn -4
 	end if
+
 	mouseX = key.axis("Mouse X")
-	if mouseX != 0 then camera.turn -5 * mouseX
+	if mouseX != 0 then camera.turn -3 * mouseX
+
+	mouseY = key.axis("Mouse Y")
+	if mouseY != 0 then
+		gfx.scrollY = mathUtil.clamp(gfx.scrollY + mouseY * 25, 0, 320)
+		display(4).scrollY = gfx.scrollY - 160
+	end if
+
 	if vInput or hInput then limitCameraMovement prevPos
 end function
 

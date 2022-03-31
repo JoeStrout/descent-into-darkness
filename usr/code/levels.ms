@@ -12,7 +12,7 @@ _levelClassByDepth.push "MazeLevel"		// Dungeon level 1
 // to each of the 32 dungeon levels.  For now, they're all just this:
 while _levelClassByDepth.len < 33
 	_levelClassByDepth.push "TestLevel"
-end for
+end while
 _levelClassByDepth.push "TestLevel"		// test level
 
 
