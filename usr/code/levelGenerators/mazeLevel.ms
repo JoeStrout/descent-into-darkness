@@ -11,6 +11,8 @@ MazeLevel.init = function
 	// make sure we have an odd number of rows/columns
 	self.clear 19, 19
 	self.addOuterWall
+	
+	// Want a repeatable maze for testing?  Try:  rnd(42)
 
 	mazeGenerator.init self.cols, self.rows
 	mazeGenerator.generate mazeGenerator.kInvertX

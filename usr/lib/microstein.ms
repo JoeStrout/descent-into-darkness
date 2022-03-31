@@ -123,27 +123,31 @@ Cell.fixCorners = function(cells)
 			end if
 			
 			// then, fix outer corners (trickier)
-			if w[dirN] and row < maxRow and col < maxCol and cells[col+1][row+1].walls[dirW] then
-				w2 = cells[col+1][row+1].walls
-				w[dirN].p[1][0] = w2[dirW].p[0][0]
-				w2[dirW].p[0][1] = w[dirN].p[1][1]
-			end if
-			if w[dirE] and row > 0 and col < maxCol and cells[col+1][row-1].walls[dirN] then
-				w2 = cells[col+1][row-1].walls
-				w[dirE].p[1][1] = w2[dirN].p[0][1]
-				w2[dirN].p[0][0] = w[dirE].p[1][0]
-			end if
-			if w[dirS] and row > 0 and col > 0 and cells[col-1][row-1].walls[dirE] then
-				w2 = cells[col-1][row-1].walls
-				w[dirS].p[1][0] = w2[dirE].p[0][0]
-				w2[dirE].p[0][1] = w[dirS].p[1][1]
-			end if
-			if w[dirW] and row < maxRow and col > 0 and cells[col-1][row+1].walls[dirS] then
-				w2 = cells[col-1][row+1].walls
-				w[dirW].p[1][1] = w2[dirS].p[0][1]
-				w2[dirS].p[0][0] = w[dirW].p[1][0]
-			end if
-			
+			for wallDir in range(0,3)
+				if not w[wallDir] then continue
+				dir2 = (wallDir+1) % 4
+				x2 = col + dirDx[wallDir] - dirDx[dir2]
+				y2 = row + dirDy[wallDir] - dirDy[dir2]
+				if x2 < 0 or x2 > maxCol or y2 < 0 or y2 > maxRow then continue
+				w2 = cells[x2][y2].walls
+				if not w2[dir2] then continue
+				if w[(wallDir+3)%4] then continue
+				if cells[x2][y2].walls[(wallDir+2)%4] then continue
+				if wallDir == dirN then
+					w[wallDir].p[1][0] = w2[dirW].p[0][0]
+					w2[dirW].p[0][1] = w[dirN].p[1][1]
+				else if wallDir == dirE then
+					w[dirE].p[1][1] = w2[dirN].p[0][1]
+					w2[dirN].p[0][0] = w[dirE].p[1][0]
+				else if wallDir == dirS then
+					w[dirS].p[1][0] = w2[dirE].p[0][0]
+					w2[dirE].p[0][1] = w[dirS].p[1][1]
+				else
+					w[dirW].p[1][1] = w2[dirS].p[0][1]
+					w2[dirS].p[0][0] = w[dirW].p[1][0]
+				end if
+			end for
+						
 			// finally, cap any freestanding walls
 			if w[dirE] and col < maxCol and cells[col+1][row].walls[dirW]then
 				// vertical (N/S) wall
@@ -304,6 +308,9 @@ Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	for w in self.walls
 		if not w then continue
 		w.drawInMap left, bottom, scaleX, scaleY
+	end for
+	for d in self.decorations
+		d.drawInMap left, bottom, scaleX, scaleY
 	end for
 end function
 
@@ -530,6 +537,9 @@ Decoration.render = function(spriteList)
 	spriteList.push self
 end function
 
+Decoration.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
+	// Subclasses should override.
+end function
 
 //===============================================================
 // CAMERA/RENDERER DEFINITION
