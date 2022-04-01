@@ -8,8 +8,9 @@ for identifier in "Renderer camera Cell Wall Decoration".split
 end for
 
 clear
-lvl = levels.get(-1)
+lvl = levels.get(1)
 Renderer.cell = lvl.cells
+camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5]
 
 // draw the floor and ceiling
 gfx.clear color.gray, 960, 960

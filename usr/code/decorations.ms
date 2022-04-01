@@ -5,10 +5,11 @@
 // puddles of water, and other such dungeon dressing.
 
 import "miscUtil"
+ensureImport "microstein"
 
 //---------------------------------------------------------------
 // Billboard: a simple Decoration that always faces the camera.
-Billboard = new Decoration
+Billboard = new microstein.Decoration
 Billboard.sprite = null  // a Sprite
 Billboard.init = function(pos, height)
 	super.init pos
@@ -79,7 +80,7 @@ end function
 
 //---------------------------------------------------------------
 // FlatDecal: a Decoration that lays flat on the floor or ceiling.
-FlatDecal = new Decoration
+FlatDecal = new microstein.Decoration
 FlatDecal.sprite = null  // a Sprite
 FlatDecal.init = function(pos, scale)
 	super.init pos

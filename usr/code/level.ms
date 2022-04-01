@@ -19,11 +19,13 @@ Level = {}
 Level.cols = 32
 Level.rows = 32
 Level.cells = null		// 2D array of Cell
+Level.startPos = [2,2]
 
 // init method: set up (load or generate) this level.
 // Subclasses should override this.
 Level.init = function
 	self.clear
+	self.startPos = [2,2]
 end function
 
 // Clear the level entirely.  add a big empty space.

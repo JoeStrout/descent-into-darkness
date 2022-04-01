@@ -10,6 +10,7 @@ MazeLevel = new level.Level
 MazeLevel.init = function
 	// make sure we have an odd number of rows/columns
 	self.clear 19, 19
+	self.startPos = [2,2]
 	self.addOuterWall
 	
 	// Want a repeatable maze for testing?  Try:  rnd(42)

@@ -203,6 +203,9 @@ Cell.calcAngles = function(containsCamera=false)
 		if maxAng < minAng or minAng > maxAng then
 //			print "Cell " +self.col+","+self.row + " is out of view"
 			self.visible = false
+		else if camera.distance(self.cornerPos[0]) > 15 then
+			// too far
+			self.visible = false
 		else
 			self.visible = true
 		end if
@@ -290,7 +293,12 @@ Cell.render = function(spriteList)
 end function
 
 Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	gfx.setPixel left + self.col*scaleX, bottom + self.row * scaleY, color.gray
+	if self.hasIndex("rock") and self.rock then
+		gfx.fillRect left + self.col*scaleX, bottom + self.row * scaleY, 
+			  scaleX-1, scaleY-1, color.gray
+	else
+		gfx.setPixel left + self.col*scaleX, bottom + self.row * scaleY, color.gray
+	end if
 	for w in self.walls
 		if not w then continue
 		w.drawInMap left, bottom, scaleX, scaleY

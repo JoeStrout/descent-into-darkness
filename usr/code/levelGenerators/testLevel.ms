@@ -37,7 +37,7 @@ end function
 TestLevel = new level.Level
 
 TestLevel.init = function
-	self.clear
+	super.init
 	self.addOuterWall
 	
 	self.addOutwardBox 5, 7, 1, 3
