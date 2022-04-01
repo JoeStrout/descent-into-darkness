@@ -10,6 +10,7 @@ TestDec.make = function(cell, scale=1)
 	dec.image = file.loadImage("/usr/content/textures/floorCobble1.png")
 	dec.init [cell.col, cell.row, 0], scale
 	cell.decorations.push dec
+	return dec
 end function
 
 TestDec.render = function(spriteList)
@@ -49,10 +50,16 @@ TestLevel.init = function
 	self.addDoubleSidedWall [16,11], [16,0]
 	
 	//TestDec.make self.cells[3][3]
-	microstein.FlatDecal.make "floorCobble1.png", self.cells[3][3]
+	cobble = FlatDecal.make("floorCobble1.png", self.cells[3][3])
+	cobble.sprite.tint = color.gray
 	
-	microstein.FlatDecal.make "shadow.png", self.cells[4][4], 0.25
-	microstein.Billboard.make "NPCs/guard.png", self.cells[4][4]
+	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
+	Billboard.make "NPCs/guard.png", self.cells[4][4]
+
+	FlatDecal.make "shadow.png", self.cells[8][3], 0.4
+	spider = Imposter.make("mobs/spider/", self.cells[8][3], 1)
+	spider.pos[2] = -0.15	// (sits better on ground)
+	spider.rotation = 45
 
 	Cell.fixCorners self.cells
 end function

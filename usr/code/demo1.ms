@@ -3,7 +3,7 @@ import "mathUtil"
 import "microstein"
 import "levels"
 
-for identifier in "Renderer camera Cell Wall Decoration dirN dirE dirS dirW dirDx dirDy".split
+for identifier in "Renderer camera Cell Wall Decoration".split
 	globals[identifier] = microstein[identifier]
 end for
 
@@ -67,7 +67,7 @@ handleInputs = function
 	end if
 
 	mouseX = key.axis("Mouse X")
-	if mouseX != 0 then camera.turn -3 * mouseX
+	if mouseX != 0 then camera.turn -2 * mouseX
 
 	mouseY = key.axis("Mouse Y")
 	if mouseY != 0 then

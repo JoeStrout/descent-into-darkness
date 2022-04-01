@@ -16,6 +16,20 @@ globals.ensureImport = function(moduleName)
 	globals[moduleName] = locals[moduleName]
 end function
 
+// Handy constants
+globals.twoPi = pi * 2
+globals.halfPi = pi / 2
+globals.degToRad = pi / 180
+globals.radToDeg = 180 / pi
+
+// Wall directions (tied to the order in which we list corners)
+globals.dirS = 0		// Y-1
+globals.dirE = 1		// X+1
+globals.dirN = 2		// Y+1
+globals.dirW = 3		// X-1
+globals.dirDx = [0, 1, 0, -1]
+globals.dirDy = [-1, 0, 1, 0]
+
 // Get the maximum of two values
 globals.max = function(a,b)
 	if a > b then return a else return b
