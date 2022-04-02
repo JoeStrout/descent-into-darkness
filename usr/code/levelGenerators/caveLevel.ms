@@ -62,7 +62,6 @@ end function
 CaveLevel.undig = function(col, row)
 	if col > 0 and col < self.cols-1 and row > 0 and row < self.rows-1 then
 		self.cells[col][row].rock = true
-		c = self.cells[col][row]
 	end if
 end function
 
