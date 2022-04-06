@@ -5,6 +5,7 @@
 import "miscUtil"
 ensureImport "mathUtil"
 ensureImport "listUtil"
+ensureImport "mapUtil"
 ensureImport "level"
 
 randInt = function(min, maxPlus1)
@@ -32,16 +33,36 @@ BspLevel.init = function
 	// Now dig the rooms and passages.
 	self.generate
 	
-	// Finally, build walls based on the rock attribute.
+	// Then add some *extra* passages so it's not a strict tree.
+	self.addExtraPassages
+	
+	// Fix any tiny (size=1) rooms.
+	self.fixTinyPassages
+	
+	// Finally, build walls based on the rock attribute and IDs.
+	joined = {}  // set of [roomA,roomB] rooms already joined by a door
 	for row in range(0, self.rows-1)
 		for col in range(0, self.cols-1)
 			cell = self.cells[col][row]
 			if cell.rock then continue
 			id = cell.roomID
-			if self.roomID(col+1,row) != id then cell.addWall dirE
-			if self.roomID(col-1,row) != id then cell.addWall dirW
-			if self.roomID(col,row+1) != id then cell.addWall dirN
-			if self.roomID(col,row-1) != id then cell.addWall dirS
+			for dir in [dirS, dirE, dirN, dirW]
+				nx = col + dirDx[dir]
+				ny = row + dirDy[dir]
+				if self.isRock(nx, ny) then
+					cell.addWall dir
+				else if self.roomID(nx, ny) != id then
+					// if these rooms haven't already been joined,
+					// then join them by a door; otherwise build a wall
+					key = [id, self.roomID(nx, ny)]
+					if not joined.hasIndex(key) then
+						joined.push key
+						cell.addWall dir, microstein.Doorway
+					else
+						cell.addWall dir
+					end if
+				end if
+			end for
 		end for
 	end for
 
@@ -61,8 +82,8 @@ BspLevel.roomID = function(col, row)
 	end if
 end function
 
-// Do one step of generation, i.e., subdivide if the given area is
-// very large, generate each sub-area, and then connect them together.
+// Subdivide if the given area is very large, generate each sub-area,
+// and then connect them together.
 BspLevel.generate = function(left=0, bottom=0, width=null, height=null)
 	if width == null then width = self.cols - left
 	if height == null then height = self.rows - bottom
@@ -109,7 +130,21 @@ BspLevel.generate = function(left=0, bottom=0, width=null, height=null)
 		roomHeight = randInt(2, top-roomBottom)
 		self.digRoom roomLeft, roomBottom, roomWidth, roomHeight
 	end if
-	
+end function
+
+BspLevel.addExtraPassages = function
+	hSections = 4
+	vSections = 4
+	colsPerHSec = floor(self.cols / hSections)
+	rowsPerVSec = floor(self.rows / vSections)
+	for hsec in range(0, hSections-2)
+		for vsec in range(0, vSections-2)
+			self.connect hsec*colsPerHSec, vsec*rowsPerVSec, colsPerHSec, rowsPerVSec,
+			  (hsec+1)*colsPerHSec, vsec*rowsPerVSec, colsPerHSec, rowsPerVSec
+			self.connect hsec*colsPerHSec, vsec*rowsPerVSec, colsPerHSec, rowsPerVSec,
+			  hsec*colsPerHSec, (vsec+1)*rowsPerVSec, colsPerHSec, rowsPerVSec
+		end for
+	end for
 end function
 
 BspLevel.digRoom = function(left, bottom, width, height)
@@ -171,6 +206,45 @@ BspLevel.findClosestRoomPointTo = function(target, left, bottom, width, height)
 		end for
 	end for
 	return best
+end function
+
+// Look for rooms of only 1 square.  Combine these with the smallest adjacent
+// room.
+BspLevel.fixTinyPassages = function
+	roomSizes = {}	// key: room ID; value: number of squares with that ID
+	roomLocs = {}	// key: room ID; value: [col,row] of some square in that room
+	for row in range(0, self.rows-1)
+		for col in range(0, self.cols-1)
+			cell = self.cells[col][row]
+			if cell.rock then continue
+			id = cell.roomID
+			roomSizes[id] = roomSizes.get(id, 0) + 1
+			roomLocs[id] = [col, row]
+		end for
+	end for
+	
+	for kv in roomSizes
+		if kv.value > 1 then continue
+		colRow = roomLocs[kv.key]
+		c = colRow[0]
+		r = colRow[1]
+		// OK, this room at colRow is of size 1.  Check each of its neighbors,
+		// and find the ID of smallest neighboring room.
+		bestID = -1
+		bestSize = 9999
+		for n in [[c+1,r], [c,r+1], [c-1,r], [c,r-1]]
+			if n[0] < 0 or n[0] >= self.cols or n[1] < 0 or n[1] >= self.rows then continue
+			ncell = self.cells[n[0]][n[1]]
+			if ncell.rock then continue
+			size = roomSizes[ncell.roomID]
+			if size < bestSize then
+				bestSize = size
+				bestID = ncell.roomID
+			end if
+		end for
+		// then change this room to match that ID
+		self.cells[c][r].roomID = bestID
+	end for
 end function
 
 if locals == globals then level.doStandardDebugCheck(new BspLevel)

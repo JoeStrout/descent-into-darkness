@@ -62,22 +62,20 @@ end function
 // Convenience method to add a wall to a cell.
 // Note that the wall so added is inset a bit, and will not join neatly
 // to form a corner with a neighboring wall (but see Cell.fixCorners).
-Cell.addWall = function(dir, textureOrWallObject)
-	if textureOrWallObject isa Wall then
-		w = textureOrWallObject
+Cell.addWall = function(dir, wallClass=null)
+	if wallClass == null then wallClass = Wall
+	w = new wallClass
+	h = 0.05  // inset of wall from edge of cell
+	if dir == dirS then
+		w.init [self.col+1, self.row+h], [self.col, self.row+h]
+	else if dir == dirW then
+		w.init [self.col+h, self.row], [self.col+h, self.row+1]
+	else if dir == dirN then
+		w.init [self.col, self.row+1-h], [self.col+1, self.row+1-h]
 	else
-		h = 0.05  // inset of wall from edge of cell
-		if dir == dirS then
-			w = Wall.make([self.col+1, self.row+h], [self.col, self.row+h])
-		else if dir == dirW then
-			w = Wall.make([self.col+h, self.row], [self.col+h, self.row+1])
-		else if dir == dirN then
-			w = Wall.make([self.col, self.row+1-h], [self.col+1, self.row+1-h])
-		else
-			w = Wall.make([self.col+1-h, self.row+1], [self.col+1-h, self.row])
-		end if
-		w.image = textureOrWallObject
+		w.init [self.col+1-h, self.row+1], [self.col+1-h, self.row]
 	end if
+
 	self.walls[dir] = w
 end function
 
@@ -313,6 +311,8 @@ end function
 // extends from floor to ceiling.  A wall is represented by two
 // ordered points: left and right points on the floor
 // (when viewed from the visible side).
+
+// ToDo: move this (and its subclasses) into its own file.
 Wall = {}
 Wall.p = null // 3D floor points, in world coordinates: [left, right]
 Wall.imageA = file.loadImage("/usr/content/textures/ToonRockA.png")
@@ -322,16 +322,19 @@ Wall.imageB = file.loadImage("/usr/content/textures/ToonRockB.png")
 Wall.imageAshort = Wall.imageA.getImage(0, 0, Wall.imageA.width/10, Wall.imageA.height)
 Wall.imageBshort = Wall.imageB.getImage(0, 0, Wall.imageB.width/10, Wall.imageB.height)
 Wall.sprite = null
+Wall.init = function(left, right)
+	self.p = [left, right]
+	if left[0] == right[0] then self.tint = "#CCCCCC" else self.tint = "#FFFFFF"
+	self.sprite = new Sprite
+	if mathUtil.distance(left, right) < 0.25 then
+		if rnd < 0.5 then self.sprite.image = self.imageAshort else self.sprite.image = self.imageBshort
+	else
+		if rnd < 0.5 then self.sprite.image = self.imageA else self.sprite.image = self.imageB
+	end if
+end function
 Wall.make = function(left, right)
 	w = new Wall
-	w.p = [left, right]
-	if left[0] == right[0] then w.tint = "#CCCCCC" else w.tint = "#FFFFFF"
-	w.sprite = new Sprite
-	if mathUtil.distance(left, right) < 0.25 then
-		if rnd < 0.5 then w.sprite.image = w.imageAshort else w.sprite.image = w.imageBshort
-	else
-		if rnd < 0.5 then w.sprite.image = w.imageA else w.sprite.image = w.imageB
-	end if
+	w.init left, right
 	return w
 end function
 
@@ -450,6 +453,31 @@ Wall.render = function(spriteList)
 	if self.angles[1] > camera.halfFovRad or self.angles[0] < -camera.halfFovRad then return // out of view
 	self.positionSprite
 	spriteList.push self.sprite
+end function
+
+
+Doorway = new Wall
+Doorway.make = function(left, right)
+	w = new Doorway
+	w.init left, right
+	return w
+end function
+
+Doorway.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
+	dx = sign(self.p[1][0] - self.p[0][0])
+	dy = sign(self.p[1][1] - self.p[0][1])
+	if dx then
+		a = [round(self.p[0][0]) + 0.25 * dx, self.p[0][1]]
+		b = [round(self.p[0][0]) + 0.75 * dx, self.p[1][1]]
+	else
+		a = [self.p[0][0], round(self.p[0][1]) + 0.25 * dy]
+		b = [self.p[0][0], round(self.p[0][1]) + 0.75 * dy]
+	end if
+	
+	gfx.line left + self.p[0][0]*scaleX, bottom + self.p[0][1]*scaleY,
+			 left + a[0]*scaleX, bottom + a[1]*scaleY, self.tint
+	gfx.line left + b[0]*scaleX, bottom + b[1]*scaleY,
+			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.tint
 end function
 
 //---------------------------------------------------------------
