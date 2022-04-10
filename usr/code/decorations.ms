@@ -11,10 +11,11 @@ ensureImport "microstein"
 // Billboard: a simple Decoration that always faces the camera.
 Billboard = new microstein.Decoration
 Billboard.sprite = null  // a Sprite
-Billboard.init = function(pos, height)
+Billboard.init = function(pos, height, image)
 	super.init pos
 	self.height = height
 	self.sprite = new Sprite
+	self.sprite.image = image
 end function
 
 Billboard.make = function(imagePath, cell, height=1.6)

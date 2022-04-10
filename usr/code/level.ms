@@ -11,7 +11,7 @@ ensureImport "microstein"
 ensureImport "decorations"
 ensureImport "qa"
 
-for identifier in "Renderer camera Cell Wall Decoration".split
+for identifier in "Renderer camera Cell".split
 	globals[identifier] = microstein[identifier]
 end for
 

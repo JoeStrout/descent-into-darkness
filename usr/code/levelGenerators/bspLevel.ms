@@ -7,6 +7,7 @@ ensureImport "mathUtil"
 ensureImport "listUtil"
 ensureImport "mapUtil"
 ensureImport "level"
+ensureImport "wall"
 
 randInt = function(min, maxPlus1)
 	return floor(mathUtil.randRange(min, maxPlus1))
@@ -57,7 +58,7 @@ BspLevel.init = function
 					key = [id, self.roomID(nx, ny)]
 					if not joined.hasIndex(key) then
 						joined.push key
-						cell.addWall dir, microstein.Doorway
+						cell.addWall dir, wall.Doorway
 					else
 						cell.addWall dir
 					end if

@@ -49,6 +49,8 @@ TestLevel.init = function
 	self.addDoubleSidedWall [1,11], [16,11]
 	self.addDoubleSidedWall [16,11], [16,0]
 	
+	self.cells[5][5].addWall dirN, wall.Doorway
+	
 	//TestDec.make self.cells[3][3]
 	cobble = FlatDecal.make("floorCobble1.png", self.cells[3][3])
 	cobble.sprite.tint = color.gray

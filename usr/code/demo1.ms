@@ -3,12 +3,12 @@ import "mathUtil"
 import "microstein"
 import "levels"
 
-for identifier in "Renderer camera Cell Wall Decoration".split
+for identifier in "Renderer camera Cell".split
 	globals[identifier] = microstein[identifier]
 end for
 
 clear
-lvl = levels.get(1)
+lvl = levels.get(-1)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5]
 
@@ -22,34 +22,34 @@ text.color = color.white
 // Limit the camera movement so that it does not pass through
 // walls (or other obstacles).  We're given the old position
 // of the camera; read and update camera.pos so that it does
-// not get too close to (or cross through) any wall.
+// not get too close to (or cross through) any solid wall.
 limitCameraMovement = function(oldPos)
 	oldCol = floor(oldPos[0])
 	oldRow = floor(oldPos[1])
 	cell = lvl.cells[oldCol][oldRow]
-	if camera.pos[0] > oldPos[0] and cell.walls[dirE] then
+	if camera.pos[0] > oldPos[0] and cell.walls[dirE] and cell.walls[dirE].blocksMovement then
 		camera.pos[0] = mathUtil.clamp(camera.pos[0], 0, oldCol+0.75)
-	else if camera.pos[0] < oldPos[0] and cell.walls[dirW] then
+	else if camera.pos[0] < oldPos[0] and cell.walls[dirW] and cell.walls[dirW].blocksMovement then
 		camera.pos[0] = mathUtil.clamp(camera.pos[0], oldCol+0.25, 99999)
 	end if
-	if camera.pos[1] > oldPos[1] and cell.walls[dirN] then
+	if camera.pos[1] > oldPos[1] and cell.walls[dirN] and cell.walls[dirN].blocksMovement then
 		camera.pos[1] = mathUtil.clamp(camera.pos[1], 0, oldRow+0.75)
-	else if camera.pos[1] < oldPos[1] and cell.walls[dirS] then
+	else if camera.pos[1] < oldPos[1] and cell.walls[dirS] and cell.walls[dirS].blocksMovement then
 		camera.pos[1] = mathUtil.clamp(camera.pos[1], oldRow+0.25, 99999)
 	end if
 	// Also check the new cell, in case we've snuck into it sideways
 	// and are now too close to a wall.
 	newCol = floor(camera.pos[0])
-	newRow = floor(camera.pos[1])
+	newRow = floor(camera.pos[1])	
 	cell = lvl.cells[newCol][newRow]
-	if camera.pos[0] < newCol + 0.25 and cell.walls[dirW] then
+	if camera.pos[0] < newCol + 0.25 and cell.walls[dirW] and cell.walls[dirW].blocksMovement then
 		camera.pos[0] = newCol + 0.25
-	else if camera.pos[0] > newCol + 0.75 and cell.walls[dirE] then
+	else if camera.pos[0] > newCol + 0.75 and cell.walls[dirE] and cell.walls[dirE].blocksMovement then
 		camera.pos[0] = newCol + 0.75
 	end if
-	if camera.pos[1] < newRow + 0.25 and cell.walls[dirS] then
+	if camera.pos[1] < newRow + 0.25 and cell.walls[dirS] and cell.walls[dirS].blocksMovement then
 		camera.pos[1] = newRow + 0.25
-	else if camera.pos[1] > newRow + 0.75 and cell.walls[dirN] then
+	else if camera.pos[1] > newRow + 0.75 and cell.walls[dirN] and cell.walls[dirN].blocksMovement then
 		camera.pos[1] = newRow + 0.75
 	end if
 	
