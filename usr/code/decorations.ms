@@ -178,6 +178,7 @@ Mesh.init = function(pos)
 	if self.vertices then
 		newVerts = self.vertices[:]
 		for v in newVerts; v.add pos; end for
+		self.vertices = newVerts
 	end if
 	self.screenVerts = []
 	self.sprites = []
@@ -213,12 +214,12 @@ Mesh.render = function(spriteList)
 			spr.tint = color.lerp(color.black, color.white, abs(cosAng))
 		end for
 	end if
-	for i in range(0, self.quads.len-1)
+	for i in self.quads.indexes
 		quad = self.quads[i]
-		viewVec = camera.pos.minus(self.vertices[quad[0]].minus)
+		viewVec = camera.pos.minus(self.vertices[quad[0]])
 		normalize viewVec
 		cosAng = viewVec.dot(self.quadNormals[i])
-		if cosAng < 0 then continue
+		//if cosAng < 0 then continue
 		corners = [null,null,null,null]
 		for j in [0,1,2,3]
 			corners[j] = self.screenVerts[quad[j]]

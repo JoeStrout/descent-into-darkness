@@ -50,6 +50,10 @@ TestLevel.init = function
 	self.addDoubleSidedWall [16,11], [16,0]
 	
 	self.cells[5][5].addWall dirN, wall.Doorway
+	self.cells[5][6].addWall dirS, wall.Doorway
+
+	self.cells[8][5].addWall dirE, wall.Doorway
+	self.cells[9][5].addWall dirW, wall.Doorway
 	
 	//TestDec.make self.cells[3][3]
 	cobble = FlatDecal.make("floorCobble1.png", self.cells[3][3])

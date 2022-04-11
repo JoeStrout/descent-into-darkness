@@ -89,6 +89,22 @@ list.minus = function(other)
 	return result
 end function
 
+// round all elements of a list (in place)
+list.round = function(decimalPlaces=0)
+	for i in self.indexes
+		self[i] = round(self[i], decimalPlaces)
+	end for
+end function
+
+// return a copy of this list with all elements rounded
+list.rounded = function(decimalPlaces=0)
+	result = self[:]
+	for i in self.indexes
+		result[i] = round(result[i], decimalPlaces)
+	end for
+	return result
+end function
+
 runUnitTests = function()
 	ensureImport "qa"
 	qa.assert max(2,5) == 5

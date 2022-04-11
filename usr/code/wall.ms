@@ -1,15 +1,5 @@
 // This file contains the Wall class and subclasses.
 
-// Utility function to cut a doorway in a texture.
-cutDoorway = function(img, width=0.5, height=0.8)
-	display(7).mode = displayMode.pixel
-	scratchDisp = display(7)
-	scratchDisp.drawImage img
-	scratchDisp.fillRect img.width * (0.5-width/2),
-	   0, width*img.width, height*img.height, color.clear
-	return scratchDisp.getImage(0, 0, img.width, img.height)
-end function
-
 
 //---------------------------------------------------------------
 // Make a Wall class to represent any vertical surface that
@@ -166,8 +156,6 @@ end function
 Doorway = new Wall
 Doorway.width = 0.5		// (proportion of the total wall width)
 Doorway.height = 0.8	// (same)
-Doorway.imageA = cutDoorway(Wall.imageA, Doorway.width, Doorway.height)
-Doorway.imageB = cutDoorway(Wall.imageB, Doorway.width, Doorway.height)
 Doorway.blocksMovement = false
 Doorway.blocksVision = false
 
@@ -176,29 +164,45 @@ markerImage = file.loadImage("/sys/pics/arrows/circlePoint.png")
 Doorway.init = function(left, right, cell)
 	super.init left, right, cell
 
-	// Create the wall endcaps for the sides of the doorway.
-	leftPos = mathUtil.lerp2d(self.p[0], self.p[1], 0.5 - (self.width/2))
-	rightPos = mathUtil.lerp2d(self.p[0], self.p[1], 0.5 + (self.width/2))
-	thickness = -0.1
-	offset = [sign(self.p[0][1] - self.p[1][1]) * thickness,
-			  sign(self.p[1][0] - self.p[0][0]) * thickness]
-	cap = Wall.make(leftPos, leftPos.plus(offset))
-//	cell.decorations.push cap
-
-	m = new decorations.Billboard
-	m.init leftPos + [0.05], 0.1, markerImage
-	m.sprite.rotation = -90
-	cell.decorations.push m
-
-//	cap = Wall.make(rightPos.plus(offset), rightPos)
-//	cell.decorations.push cap
-	
-	// Create the horizontal surface at the top of the doorway.
-	// (ToDo)
-	
+	// Create a mesh for the wall/doorway
+	self.wallMesh = new decorations.Mesh
+	self.wallMesh.init [cell.col, cell.row, 0]
+	left = left + [0]
+	right = right + [0]
+	leftTop = left.plus([0,0,1])
+	rightTop = right.plus([0,0,1])
+	leftRound = left.rounded
+	rightRound = right.rounded
+	doorLeft = mathUtil.lerp2d(leftRound, rightRound, 0.35) + [0]
+	doorRight = mathUtil.lerp2d(leftRound, rightRound, 0.65) + [0]
+	doorLeftJamb = doorLeft.plus([0,0,0.8])
+	doorRightJamb = doorRight.plus([0,0,0.8])	
+	doorLeftTop = doorLeft.plus([0,0,1])
+	doorRightTop = doorRight.plus([0,0,1])
+	back = [sign(left[1] - right[1])*0.1, sign(right[0] - left[0])*0.1, 0]
+	self.wallMesh.vertices = [left, right, rightTop, leftTop, 
+		doorLeft, doorRight, doorRightJamb, doorLeftJamb, doorRightTop, doorLeftTop,
+		doorLeft.plus(back), doorRight.plus(back), 
+		doorRightJamb.plus(back), doorLeftJamb.plus(back)]
+	// (...it's best to draw a picture...)
+	self.wallMesh.quads = [
+		[4, 10, 13, 7],		// left doorjamb
+		[11, 5, 6, 12],		// right doorjamb
+		[13, 12, 6, 7],		// top of doorway
+		[0, 4, 9, 3],		// wall to left of door
+		[5, 1, 2, 8],		// wall to right of door
+		[7, 6, 8, 9]]		// wall above doorway
+	self.wallMesh.quadTexture = self.imageA
 	
 	globals.wtf = self
-	globals.wtfc = cell
+	globals.ww = self.wallMesh
+end function
+
+Doorway.render = function(spriteList)
+	self.angles = [camera.relativeAngle(self.p[0]), camera.relativeAngle(self.p[1])]
+	if self.angles[0] < self.angles[1] then return	// facing away
+	if self.angles[1] > camera.halfFovRad or self.angles[0] < -camera.halfFovRad then return // out of view
+	self.wallMesh.render spriteList
 end function
 
 Doorway.make = function(left, right, cell)

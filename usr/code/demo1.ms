@@ -8,7 +8,7 @@ for identifier in "Renderer camera Cell".split
 end for
 
 clear
-lvl = levels.get(-1)
+lvl = levels.get(3)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 

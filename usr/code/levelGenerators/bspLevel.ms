@@ -149,13 +149,23 @@ BspLevel.addExtraPassages = function
 end function
 
 BspLevel.digRoom = function(left, bottom, width, height)
+	roomCells = []
 	for col in range(left, left+width-1)
 		for row in range(bottom, bottom+height-1)
 			cell = self.cells[col][row]
 			cell.rock = false
 			cell.roomID = self.nextRoomID
+			roomCells.push cell
 		end for
 	end for
+	if rnd < 0.1 then
+		// add a spider!
+		loc = roomCells.any
+		FlatDecal.make "shadow.png", loc, 0.4
+		spider = Imposter.make("mobs/spider/", loc, 1)
+		spider.pos[2] = -0.15	// (sits better on ground)
+		spider.rotation = round(360 * rnd)
+	end if
 	self.startPos = [round(left+width/2), round(bottom+height/2)]
 	self.nextRoomID = self.nextRoomID + 1
 end function
