@@ -1,15 +1,29 @@
-// This file defines various subclasses of microstein.Decoration.
+// This file defines Decoration and its various subclasses.
 // These are all objects that exist within a Cell of the level,
 // and know how to render themselves.  Generally they are static
 // (or static-ish) objects, like trees, lamp posts, cobblestones,
 // puddles of water, and other such dungeon dressing.
 
 import "miscUtil"
-ensureImport "microstein"
+ensureImport "mathUtil"
+
+//---------------------------------------------------------------
+// Decoration class: something in a cell that knows how to render.
+Decoration = {}
+Decoration.pos = [0,0]  // position of the CENTER of the decoration
+Decoration.init = function(pos)
+	self.pos = pos
+end function
+Decoration.render = function(spriteList)
+	// subclasses should override this
+end function
+Decoration.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
+	// subclasses should override this
+end function
 
 //---------------------------------------------------------------
 // Billboard: a simple Decoration that always faces the camera.
-Billboard = new microstein.Decoration
+Billboard = new Decoration
 Billboard.sprite = null  // a Sprite
 Billboard.init = function(pos, height, image)
 	super.init pos
@@ -81,7 +95,7 @@ end function
 
 //---------------------------------------------------------------
 // FlatDecal: a Decoration that lays flat on the floor or ceiling.
-FlatDecal = new microstein.Decoration
+FlatDecal = new Decoration
 FlatDecal.sprite = null  // a Sprite
 FlatDecal.init = function(pos, scale)
 	super.init pos
@@ -142,6 +156,95 @@ FlatDecal.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	// ToDo
 end function
 
+//---------------------------------------------------------------
+// Mesh: a 3D model made from a set of quadrilateral faces.
+Mesh = new Decoration
+Mesh.vertices = null	// list of 3D points, in world space
+Mesh.quads = null		// list of [four vertex indices] per quad
+Mesh.quadTexture = file.loadImage("/usr/content/textures/TestTexture.png")
+
+Mesh.make = function(cell, alreadyMadeInstance=null)
+	if alreadyMadeInstance then mesh = alreadyMadeInstance else mesh = new Mesh
+	mesh.init [cell.col, cell.row, 0]
+	cell.decorations.push mesh
+	return mesh
+end function
+
+// Mesh.init: if we have vertices defined (probably from a base class),
+// we add the given position to shift them into position.  So your base
+// class or pre-init vertices should be in local coordinates.
+Mesh.init = function(pos)
+	self.pos = pos
+	if self.vertices then
+		newVerts = self.vertices[:]
+		for v in newVerts; v.add pos; end for
+	end if
+	self.screenVerts = null
+	self.sprites = null
+end function
+
+Mesh.render = function(spriteList)
+	// First, calculate the screen position of each vertex
+	if not self.screenVerts then self.screenVerts = [null]*self.vertices.len
+	for i in range(0, self.vertices.len - 1)
+		v = self.vertices[i]
+		angle = camera.relativeAngle(v)
+		x = 480 - tan(angle)*1158
+		invD = 1 / camera.distance(v)
+		if invD < 0 then return	// ToDo: deal with this
+		y = 320 + (-300 + 600 * v[2]) * invD
+		self.screenVerts[i] = [x,y]
+	end for
+	
+	// Then submit a properly stretched sprite for each quad
+	if not self.sprites then
+		self.sprites = []
+		for q in self.quads
+			spr = new Sprite
+			spr.image = self.quadTexture
+			self.sprites.push spr
+		end for
+	end if
+	sprIdx = 0
+	for quad in self.quads
+		corners = [null,null,null,null]
+		for i in [0,1,2,3]
+			corners[i] = self.screenVerts[quad[i]]
+		end for
+		if corners[0][0] > corners[1][0] or corners[3][0] > corners[2][0] then continue
+		spr = self.sprites[sprIdx]
+		spr.setCorners corners
+		spriteList.push spr
+		sprIdx = sprIdx + 1
+	end for
+end function
+
+Mesh.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
+	for quad in self.quads
+		corners = []
+		for vidx in quad
+			v = self.vertices[vidx]
+			corners.push [left + v[0]*scaleX, bottom + v[1]*scaleY]
+		end for
+		gfx.drawPoly corners, color.silver
+	end for
+end function
+
+//---------------------------------------------------------------
+// A few simple shapes mostly to test the Mesh class.
+Pyramid = new Mesh
+Pyramid.vertices = [
+	[0.1, 0.1, 0],
+	[0.9, 0.1, 0],
+	[0.9, 0.9, 0],
+	[0.1, 0.9, 0],
+	[0.5, 0.5, 0.6]]
+Pyramid.quads = [ [0,1,4,4], [1,2,4,4], [2,3,4,4], [3,0,4,4] ]
+Pyramid.make = function(cell, imageName)
+	result = super.make(cell, new Pyramid)
+	if imageName then result.quadTexture = file.loadImage("/usr/content/textures/" + imageName)
+	return result
+end function
 
 // We use these classes a lot, so let's just make them global:
 globals.Billboard = Billboard

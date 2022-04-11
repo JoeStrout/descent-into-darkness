@@ -21,8 +21,10 @@ import "qa"
 import "mathUtil"
 import "listUtil"
 ensureImport "wall"
+ensureImport "decorations"
 
 Wall = wall.Wall
+Decoration = decorations.Decoration
 
 //===============================================================
 // WORLD (LEVEL) DEFINITION
@@ -328,20 +330,6 @@ end function
 Entity.pushSprite = function
 	self.positionSprite
 	display(4).sprites.push self
-end function
-
-//---------------------------------------------------------------
-// Decoration class: something in a cell that knows how to render.
-Decoration = {}
-Decoration.pos = [0,0]  // position of the CENTER of the decoration
-Decoration.init = function(pos)
-	self.pos = pos
-end function
-Decoration.render = function(spriteList)
-	// subclasses should override this
-end function
-Decoration.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	// subclasses should override this
 end function
 
 //===============================================================
