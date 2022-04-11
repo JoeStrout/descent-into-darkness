@@ -179,8 +179,9 @@ Mesh.init = function(pos)
 		newVerts = self.vertices[:]
 		for v in newVerts; v.add pos; end for
 	end if
-	self.screenVerts = null
-	self.sprites = null
+	self.screenVerts = []
+	self.sprites = []
+	self.quadNormals = []
 end function
 
 Mesh.render = function(spriteList)
@@ -196,26 +197,35 @@ Mesh.render = function(spriteList)
 		self.screenVerts[i] = [x,y]
 	end for
 	
-	// Then submit a properly stretched sprite for each quad
+	// Then submit a properly stretched sprite for each quad that is facing the camera
 	if not self.sprites then
-		self.sprites = []
 		for q in self.quads
 			spr = new Sprite
 			spr.image = self.quadTexture
 			self.sprites.push spr
+			// calculate the angle this quad makes with the light to set the sprite tint
+			sideA = self.vertices[q[1]].minus(self.vertices[q[0]])
+			sideB = self.vertices[q[3]].minus(self.vertices[q[0]])
+			normal = crossProduct(sideA, sideB)
+			normalize normal
+			self.quadNormals.push normal
+			cosAng = normal.dot(Renderer.light)
+			spr.tint = color.lerp(color.black, color.white, abs(cosAng))
 		end for
 	end if
-	sprIdx = 0
-	for quad in self.quads
+	for i in range(0, self.quads.len-1)
+		quad = self.quads[i]
+		viewVec = camera.pos.minus(self.vertices[quad[0]].minus)
+		normalize viewVec
+		cosAng = viewVec.dot(self.quadNormals[i])
+		if cosAng < 0 then continue
 		corners = [null,null,null,null]
-		for i in [0,1,2,3]
-			corners[i] = self.screenVerts[quad[i]]
+		for j in [0,1,2,3]
+			corners[j] = self.screenVerts[quad[j]]
 		end for
-		if corners[0][0] > corners[1][0] or corners[3][0] > corners[2][0] then continue
-		spr = self.sprites[sprIdx]
+		spr = self.sprites[i]
 		spr.setCorners corners
 		spriteList.push spr
-		sprIdx = sprIdx + 1
 	end for
 end function
 
@@ -245,6 +255,24 @@ Pyramid.make = function(cell, imageName)
 	if imageName then result.quadTexture = file.loadImage("/usr/content/textures/" + imageName)
 	return result
 end function
+
+Box = new Mesh
+Box.vertices = [
+	[0.2, 0.3, 0],
+	[0.8, 0.3, 0],
+	[0.8, 0.7, 0],
+	[0.2, 0.7, 0],
+	[0.2, 0.3, 0.35],
+	[0.8, 0.3, 0.35],
+	[0.8, 0.7, 0.35],
+	[0.2, 0.7, 0.35]]
+Box.quads = [ [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7], [4,5,6,7] ]
+Box.make = function(cell, imageName)
+	result = super.make(cell, new Box)
+	if imageName then result.quadTexture = file.loadImage("/usr/content/textures/" + imageName)
+	return result
+end function
+
 
 // We use these classes a lot, so let's just make them global:
 globals.Billboard = Billboard

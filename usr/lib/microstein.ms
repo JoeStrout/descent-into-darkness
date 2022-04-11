@@ -405,6 +405,9 @@ end function
 // Renderer: holds all the data needed for rendering the scene.
 Renderer = {}
 
+Renderer.light = [0.4, 0.6, -1]
+normalize Renderer.light
+
 Renderer.cell = null		// a 2D array of Cell
 
 // Our depth buf, after some code evolution, is now really just a set of

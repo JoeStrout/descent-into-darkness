@@ -63,7 +63,7 @@ TestLevel.init = function
 	spider.pos[2] = -0.15	// (sits better on ground)
 	spider.rotation = 45
 
-	decorations.Pyramid.make self.cells[3][4], "ToonBrickA.png"
+	decorations.Box.make self.cells[3][4], "ToonBrickA.png"
 	
 	Cell.fixCorners self.cells
 end function

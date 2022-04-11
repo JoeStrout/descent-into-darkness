@@ -45,6 +45,50 @@ rollDie = function(sides = 6)
 	return ceil(rnd * sides)
 end function
 
+// Calculate the cross product of two 3D vectors
+globals.crossProduct = function(a, b)
+	return [ a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0] ]
+end function
+
+// Normalize a 2D or 3D vector (in place)
+globals.normalize = function(v)
+	maxi = v.len - 1
+	sumSqr = 0
+	for i in range(0, maxi)
+		sumSqr = sumSqr + v[i]^2
+	end for
+	if sumSqr == 0 then return
+	factor = 1 / sqrt(sumSqr)
+	for i in range(0, maxi)
+		v[i] = v[i] * factor
+	end for
+end function
+
+// subtract: subtract a number from all elements of a list (in place),
+// OR do element-wise subtraction with another list of the same size.
+list.subtract = function(other)
+	if other isa list then
+		maxi = self.len - 1
+		if other.len - 1 < maxi then maxi = other.len - 1
+		for i in range(0,maxi)
+			self[i] = self[i] - other[i]
+		end for
+	else
+		for i in self.indexes
+			self[i] = self[i] - other
+		end for
+	end if
+end function
+
+// minus: subtract a number from all elements of a list, OR do element-wise 
+// subtraction with another list of the same size, returning a new list 
+// (leaving this one untouched).
+list.minus = function(other)
+	result = self[:]
+	result.subtract other
+	return result
+end function
+
 runUnitTests = function()
 	ensureImport "qa"
 	qa.assert max(2,5) == 5
