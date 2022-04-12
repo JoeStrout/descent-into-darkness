@@ -405,8 +405,32 @@ end function
 // Renderer: holds all the data needed for rendering the scene.
 Renderer = {}
 
-Renderer.light = [0.4, 0.6, -1]
+Renderer.light = [0.4, 0.6, -1]	// direction of the light
 normalize Renderer.light
+
+// Find the color tint (between black and white) that should be applied
+// to a surface containing the given three points.
+Renderer.tintForSurface = function(ptA, ptB, ptC)
+	// Start by finding the normal to the surface.
+	normal = crossProduct(ptB.minus(ptA), ptC.minus(ptA))
+	normalize normal
+	return self.tintForNormal(normal)
+end function
+
+// Find the color tint (between black and white) that should be applied
+// to a surface with the given normal vector.
+Renderer.tintForNormal = function(normal)
+	cosAng = normal.dot(self.light)
+	if normal[2] < 0 then return color.lerp("#000000", "#666666", abs(cosAng))
+	return color.lerp("#666666", "#FFFFFF", abs(cosAng))
+end function
+
+// Darken the given tint based on the distance (given as 1/distance)
+// from the camera.  Return the new (probably darker) tint.
+Renderer.darkenForDistance = function(nearbyTint, invD)
+	if invD > 1 then return nearbyTint
+	return color.lerp(nearbyTint, "#000000", (1 - invD)^5)
+end function
 
 Renderer.cell = null		// a 2D array of Cell
 

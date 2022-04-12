@@ -1,5 +1,7 @@
 // This file contains the Wall class and subclasses.
 
+import "miscUtil"
+ensureImport "qa"
 
 //---------------------------------------------------------------
 // Make a Wall class to represent any vertical surface that
@@ -19,8 +21,9 @@ Wall.sprite = null
 Wall.blocksMovement = true
 Wall.blocksVision = true
 Wall.init = function(left, right, cell)
+	qa.assert left.len==2 and right.len==2  // left/right should be 2D floor coordinates
 	self.p = [left, right]
-	if left[0] == right[0] then self.tint = "#CCCCCC" else self.tint = "#FFFFFF"
+	self.tint = Renderer.tintForSurface(left + [0], right + [0], left + [1])
 	self.sprite = new Sprite
 	if mathUtil.distance(left, right) < 0.25 then
 		if rnd < 0.5 then self.sprite.image = self.imageAshort else self.sprite.image = self.imageBshort
@@ -156,10 +159,27 @@ end function
 Doorway = new Wall
 Doorway.width = 0.5		// (proportion of the total wall width)
 Doorway.height = 0.8	// (same)
-Doorway.blocksMovement = false
-Doorway.blocksVision = false
+Doorway.sourceImage = file.loadImage("/usr/content/textures/doorTexture.png")
+Doorway.isClosed = true
+Doorway.blocksMovement = function; return self.isClosed; end function
+Doorway.blocksVision = function; return not self.isClosed; end function
 
-markerImage = file.loadImage("/sys/pics/arrows/circlePoint.png")
+Doorway.prepImages = function
+	w = self.sourceImage.width
+	h = self.sourceImage.height
+	dl = round(w * 0.35)		// door left
+	dr = round(w * 0.65)		// door right
+	dt = round(h * 0.8)			// door top
+	self.leftImage = self.sourceImage.getImage(0, 0, dl, h)
+	self.topImage = self.sourceImage.getImage(dl, dt, dr-dl, h-dt)
+	self.rightImage = self.sourceImage.getImage(dr, 0, w-dr, h)
+	jw = 0.1 * w				// jamb width
+	self.leftJambImage = self.sourceImage.getImage(dl-jw, 0, jw, dt)
+	self.rightJambImage = self.sourceImage.getImage(dr, 0, jw, dt)
+	self.topJambImage = self.sourceImage.getImage(dl, dt, dr-dl, jw)
+	self.doorImage = self.sourceImage.getImage(dl, 0, dr-dl, dt)
+end function
+Doorway.prepImages
 
 Doorway.init = function(left, right, cell)
 	super.init left, right, cell
@@ -180,19 +200,30 @@ Doorway.init = function(left, right, cell)
 	doorLeftTop = doorLeft.plus([0,0,1])
 	doorRightTop = doorRight.plus([0,0,1])
 	back = [sign(left[1] - right[1])*0.1, sign(right[0] - left[0])*0.1, 0]
+	halfBack = back.times(0.5)
 	self.wallMesh.vertices = [left, right, rightTop, leftTop, 
 		doorLeft, doorRight, doorRightJamb, doorLeftJamb, doorRightTop, doorLeftTop,
 		doorLeft.plus(back), doorRight.plus(back), 
-		doorRightJamb.plus(back), doorLeftJamb.plus(back)]
+		doorRightJamb.plus(back), doorLeftJamb.plus(back),
+		doorLeft.plus(halfBack), doorRight.plus(halfBack), 
+		doorRightJamb.plus(halfBack), doorLeftJamb.plus(halfBack)]
 	// (...it's best to draw a picture...)
 	self.wallMesh.quads = [
 		[4, 10, 13, 7],		// left doorjamb
 		[11, 5, 6, 12],		// right doorjamb
-		[13, 12, 6, 7],		// top of doorway
+		[13, 12, 6, 7],		// top (jamb) of doorway
+		[14, 15, 16, 17],	// door itself
 		[0, 4, 9, 3],		// wall to left of door
 		[5, 1, 2, 8],		// wall to right of door
 		[7, 6, 8, 9]]		// wall above doorway
-	self.wallMesh.quadTexture = self.imageA
+	self.wallMesh.quadTexture = [
+		self.leftJambImage,
+		self.rightJambImage,
+		self.topJambImage,
+		self.doorImage,
+		self.leftImage,
+		self.rightImage,
+		self.topImage]
 	
 	globals.wtf = self
 	globals.ww = self.wallMesh

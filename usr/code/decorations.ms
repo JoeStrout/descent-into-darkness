@@ -161,6 +161,8 @@ end function
 Mesh = new Decoration
 Mesh.vertices = null	// list of 3D points, in world space
 Mesh.quads = null		// list of [four vertex indices] per quad
+// Texture: may use a single image for all quads, or provide a list
+// as long as Mesh.quads, to use a different texture on each one.
 Mesh.quadTexture = file.loadImage("/usr/content/textures/TestTexture.png")
 
 Mesh.make = function(cell, alreadyMadeInstance=null)
@@ -200,18 +202,19 @@ Mesh.render = function(spriteList)
 	
 	// Then submit a properly stretched sprite for each quad that is facing the camera
 	if not self.sprites then
-		for q in self.quads
+		for i in self.quads.indexes
+			q = self.quads[i]
 			spr = new Sprite
-			spr.image = self.quadTexture
+			if self.quadTexture isa list then
+				spr.image = self.quadTexture[i]
+			else 
+				spr.image = self.quadTexture
+			end if
 			self.sprites.push spr
-			// calculate the angle this quad makes with the light to set the sprite tint
-			sideA = self.vertices[q[1]].minus(self.vertices[q[0]])
-			sideB = self.vertices[q[3]].minus(self.vertices[q[0]])
-			normal = crossProduct(sideA, sideB)
-			normalize normal
+			normal = miscUtil.surfaceNormal(self.vertices[q[0]], self.vertices[q[1]],
+				self.vertices[q[2]])
 			self.quadNormals.push normal
-			cosAng = normal.dot(Renderer.light)
-			spr.tint = color.lerp(color.black, color.white, abs(cosAng))
+			spr.nearbyTint = Renderer.tintForNormal(normal)
 		end for
 	end if
 	for i in self.quads.indexes
@@ -226,6 +229,8 @@ Mesh.render = function(spriteList)
 		end for
 		spr = self.sprites[i]
 		spr.setCorners corners
+		spr.tint = Renderer.darkenForDistance(spr.nearbyTint, invD)
+
 		spriteList.push spr
 	end for
 end function

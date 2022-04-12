@@ -64,6 +64,14 @@ globals.normalize = function(v)
 	end for
 end function
 
+// Find the normal (i.e. a unit-length perpendicular vector) to
+// a surface defined by three 3D points.
+surfaceNormal = function(ptA, ptB, ptC)
+	normal = crossProduct(ptB.minus(ptA), ptC.minus(ptA))
+	normalize normal
+	return normal
+end function
+
 // subtract: subtract a number from all elements of a list (in place),
 // OR do element-wise subtraction with another list of the same size.
 list.subtract = function(other)
