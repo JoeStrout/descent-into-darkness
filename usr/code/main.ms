@@ -1,7 +1,9 @@
+import "miscUtil"
 import "listUtil"
 import "mathUtil"
 import "renderer"
 import "levels"
+import "sounds"
 
 for identifier in "Renderer camera Cell".split
 	globals[identifier] = renderer[identifier]
@@ -17,7 +19,7 @@ gfx.clear color.gray, 960, 960
 gfx.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
 gfx.scrollY = 160
 
-text.color = color.white
+text.color = color.silver
 
 // Limit the camera movement so that it does not pass through
 // walls (or other obstacles).  We're given the old position
@@ -52,9 +54,23 @@ limitCameraMovement = function(oldPos)
 	else if camera.pos[1] > newRow + 0.75 and cell.walls[dirN] and cell.walls[dirN].blocksMovement then
 		camera.pos[1] = newRow + 0.75
 	end if
-	
 end function
 
+doAction = function
+	// open/close a door if we are facing one
+	cell = lvl.cells[camera.pos[0]][camera.pos[1]]
+	dir = miscUtil.closestDir(camera.angle)
+	if cell.walls[dir] isa wall.Doorway then
+		cell.walls[dir].toggleDoor
+		if cell.walls[dir].isClosed then
+			sounds.doorClose.play
+		else
+			sounds.doorOpen.play
+		end if
+	end if
+end function
+
+wasActionDown = false
 handleInputs = function
 	hInput = key.axis("Horizontal")
 	vInput = key.axis("Vertical")
@@ -77,6 +93,11 @@ handleInputs = function
 	end if
 
 	if vInput or hInput then limitCameraMovement prevPos
+	
+	actionDown = key.pressed("space") or key.pressed("left shift") or 
+	  key.pressed("right shift") or key.pressed("tab")
+	if actionDown and not wasActionDown then doAction
+	outer.wasActionDown = actionDown
 end function
 
 // enter the main loop
@@ -89,9 +110,10 @@ while true
 	end if
 	renderer.rerender
 	text.row = 25; text.column = 3
+	dir = miscUtil.closestDir(camera.angle)
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
-	   "  Angle: " + round(camera.angle) + "     "
+	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(dir) + ")     "
 end while
 key.clear
 text.row = 2

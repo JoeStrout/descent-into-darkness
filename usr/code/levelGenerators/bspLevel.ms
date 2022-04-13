@@ -73,7 +73,7 @@ BspLevel.init = function
 		cell = v[0]
 		dir = v[1]
 		w = cell.walls[dir]
-		closed = rnd < 0.1
+		closed = rnd < 0.8
 		open = not closed
 		if dir == dirN or dir == dirE then
 			type = wall.Doorway.typeOpenFront * open + wall.Doorway.typeClosedFront * closed

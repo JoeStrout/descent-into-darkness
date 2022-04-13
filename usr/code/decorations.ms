@@ -87,7 +87,7 @@ Imposter.render = function(spriteList)
 	// image 0 for ang < 90 and ang > 270; image 1 for ang < 90 < 270.
 	sections = self.images.len
 	idx = round(ang*sections/360) % sections
-	text.row=24; print "angToCam:" + round(angToCam) + "; ang:"+round(ang) + "; idx:"+idx + "    "
+	
 	self.sprite.image = self.images[idx]
 	super.render spriteList
 end function

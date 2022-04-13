@@ -30,6 +30,15 @@ globals.dirW = 3		// X-1
 globals.dirDx = [0, 1, 0, -1]
 globals.dirDy = [-1, 0, 1, 0]
 
+closestDir = function(angleDegrees)
+	a = (angleDegrees + 495) % 360
+	return floor(a / 90)
+end function
+
+dirString = function(dir)
+	return ["South", "East", "North", "West"][dir]
+end function
+
 // Get the maximum of two values
 globals.max = function(a,b)
 	if a > b then return a else return b

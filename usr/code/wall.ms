@@ -159,6 +159,14 @@ Doorway.doorImage = file.loadImage("/usr/content/textures/doorTexture.png")
 Doorway.isClosed = false
 Doorway.blocksMovement = function; return self.isClosed; end function
 Doorway.blocksVision = function; return self.isClosed; end function
+Doorway.type = -1		// one of the constants below
+
+// Constants for what type of mesh the doorway should use:
+Doorway.typeEmpty = 0
+Doorway.typeClosedBack = 1
+Doorway.typeClosedFront = 2
+Doorway.typeOpenBack = 3
+Doorway.typeOpenFront = 4
 
 Doorway.prepImages = function
 	// get images for the wall surrounding the doorway
@@ -188,12 +196,17 @@ Doorway.prepImages = function
 end function
 Doorway.prepImages
 
-// Constants for what type of mesh the doorway should use:
-Doorway.typeEmpty = 0
-Doorway.typeClosedBack = 1
-Doorway.typeClosedFront = 2
-Doorway.typeOpenBack = 3
-Doorway.typeOpenFront = 4
+Doorway.cell = null			// (needed for toggling the door)
+Doorway.otherSide = function
+	if not self.cell then return null
+	myDir = self.cell.walls.indexOf(self)
+	if myDir == null then return null
+	otherDir = (myDir + 2) % 4
+	otherCell = lvl.cells[self.cell.col + dirDx[myDir]][self.cell.row + dirDy[myDir]]
+	otherWall = otherCell.walls[otherDir]
+	if not otherWall isa Doorway then return null
+	return otherWall
+end function
 
 Doorway.createMesh = function(meshType, doorOnly=false)
 	mesh = new decorations.Mesh
@@ -300,15 +313,47 @@ Doorway.createMesh = function(meshType, doorOnly=false)
 	return mesh
 end function
 
-Doorway.init = function(left, right, cell, type = 0)
-	super.init left, right, cell
+Doorway.setType = function(type)
+	if type == self.type then return
+	if self.type == Doorway.typeOpenFront then
+		self.cell.decorations.removeVal self.doorMesh
+	end if
 	
+	self.type = type
 	self.mesh = self.createMesh(type)
 	if type == Doorway.typeOpenFront then
-		cell.decorations.push self.createMesh(type, true)
+		self.doorMesh = self.createMesh(type, true)
+		self.cell.decorations.insert 0, self.doorMesh
 	end if
 	
 	self.isClosed = (type == Doorway.typeClosedBack or type == Doorway.typeClosedFront)
+end function
+
+Doorway.init = function(left, right, cell, type = 0)
+	super.init left, right, cell
+	self.cell = cell
+	self.setType type
+end function
+
+Doorway.toggleDoor = function(andOtherSide = true)
+	otherDoor = null
+	if andOtherSide then otherDoor = self.otherSide
+	
+	if self.type == Doorway.typeOpenFront then
+		self.setType Doorway.typeClosedFront
+		if otherDoor then otherDoor.setType Doorway.typeClosedBack
+	else if self.type == Doorway.typeOpenBack then
+		self.setType Doorway.typeClosedBack
+		if otherDoor then otherDoor.setType Doorway.typeClosedFront
+	else if self.type == Doorway.typeClosedFront then
+		self.setType Doorway.typeOpenFront
+		if otherDoor then otherDoor.setType Doorway.typeOpenBack
+	else if self.type == Doorway.typeClosedBack then
+		self.setType Doorway.typeOpenBack
+		if otherDoor then otherDoor.setType Doorway.typeOpenFront
+	else
+		return
+	end if
 end function
 
 Doorway.render = function(spriteList)
