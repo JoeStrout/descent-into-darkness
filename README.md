@@ -13,9 +13,9 @@ This is a community project to develop a Doom-like fantasy RPG dungeon crawler u
 
 ## Controls
 
-WASD or arrow keys: move/strafe.
-Mouse: rotate and look up/down.
-Shift, Tab, or Spacebar: toggle door.
+- **WASD** or **arrow keys**: move/strafe.
+- **Mouse**: rotate and look up/down.
+- **Shift**, **Tab**, or **Spacebar**: toggle door.
 
 Note that there is no combat yet.  You can explore and encounter giant spiders, but you can't hurt them and they can't hurt you.
 
