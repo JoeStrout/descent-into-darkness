@@ -41,7 +41,7 @@ BspLevel.init = function
 	self.fixTinyPassages
 	
 	// Finally, build walls based on the rock attribute and IDs.
-	joined = {}  // set of [roomA,roomB] rooms already joined by a door
+	joined = {}  // key: [roomA,roomB]; value: [cell,dir] that should be converted to Doorway
 	for row in range(0, self.rows-1)
 		for col in range(0, self.cols-1)
 			cell = self.cells[col][row]
@@ -54,20 +54,33 @@ BspLevel.init = function
 					cell.addWall dir
 				else if self.roomID(nx, ny) != id then
 					// if these rooms haven't already been joined,
-					// then join them by a door; otherwise build a wall
+					// then remember this 
 					key = [id, self.roomID(nx, ny)]
+					cell.addWall dir
 					if not joined.hasIndex(key) then
-						joined.push key
-						cell.addWall dir, wall.Doorway
-					else
-						cell.addWall dir
+						joined[key] = [cell, dir]
 					end if
 				end if
 			end for
 		end for
 	end for
 
+	// fix up the corners wherever two walls come together
 	Cell.fixCorners self.cells
+	
+	// finally, convert walls to doors as needed
+	for v in joined.values
+		cell = v[0]
+		dir = v[1]
+		w = cell.walls[dir]
+		if dir == dirN or dir == dirE then
+			type = wall.Doorway.typeOpenFront
+		else
+			type = wall.Doorway.typeOpenBack
+		end if
+		door = wall.Doorway.make(w.p[0], w.p[1], cell, type)
+		cell.walls[dir] = door
+	end for
 end function
 
 BspLevel.isRock = function(col, row)

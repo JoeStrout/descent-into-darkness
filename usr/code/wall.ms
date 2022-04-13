@@ -10,7 +10,7 @@ ensureImport "qa"
 // (when viewed from the visible side).
 
 Wall = {}
-Wall.p = null // 3D floor points, in world coordinates: [left, right]
+Wall.p = null // 2D floor points, in world coordinates: [left, right]
 Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
 //Wall.imageA = file.loadImage("/usr/content/textures/TestTexture.png")
@@ -33,7 +33,7 @@ Wall.init = function(left, right, cell)
 end function
 Wall.make = function(left, right, cell)
 	w = new Wall
-	w.init left, right, self
+	w.init left, right, cell
 	return w
 end function
 
@@ -155,36 +155,55 @@ end function
 Doorway = new Wall
 Doorway.width = 0.5		// (proportion of the total wall width)
 Doorway.height = 0.8	// (same)
-Doorway.sourceImage = file.loadImage("/usr/content/textures/doorTexture.png")
-Doorway.isClosed = true
+Doorway.doorImage = file.loadImage("/usr/content/textures/doorTemplate.png")
+Doorway.isClosed = false
 Doorway.blocksMovement = function; return self.isClosed; end function
-Doorway.blocksVision = function; return not self.isClosed; end function
+Doorway.blocksVision = function; return self.isClosed; end function
 
 Doorway.prepImages = function
-	w = self.sourceImage.width
-	h = self.sourceImage.height
+	// get images for the wall surrounding the doorway
+	wallImg = self.imageA
+	w = wallImg.width; h = wallImg.height
 	dl = round(w * 0.35)		// door left
 	dr = round(w * 0.65)		// door right
 	dt = round(h * 0.8)			// door top
-	self.leftImage = self.sourceImage.getImage(0, 0, dl, h)
-	self.topImage = self.sourceImage.getImage(dl, dt, dr-dl, h-dt)
-	self.rightImage = self.sourceImage.getImage(dr, 0, w-dr, h)
-	jw = 0.1 * w				// jamb width
-	self.leftJambImage = self.sourceImage.getImage(dl-jw, 0, jw, dt)
-	self.rightJambImage = self.sourceImage.getImage(dr, 0, jw, dt)
-	self.topJambImage = self.sourceImage.getImage(dl, dt, dr-dl, jw)
-	self.doorImage = self.sourceImage.getImage(dl, 0, dr-dl, dt)
+	jw = round(w * 0.1)			// jamb width
+	self.leftImage = wallImg.getImage(0, 0, dl, h)
+	self.topImage = wallImg.getImage(dl, dt, dr-dl, h-dt)
+	self.rightImage = wallImg.getImage(dr, 0, w-dr, h)
+	self.leftJambImage = wallImg.getImage(dl, 0, jw, dt)
+	self.rightJambImage = wallImg.getImage(dr-jw, 0, jw, dt)
+	self.topJambImage = wallImg.getImage(dl, dt-jw, dr-dl, jw)
+		
+	// now get images for the door itself
+	doorImg = self.doorImage
+	w = doorImg.width; h = doorImg.height
+	dw = round(w * 0.3)		// door width
+	ew = round(w * 0.025)	// edge (of the door) width
+	self.doorClosedFront = doorImg.getImage(0, 0, dw, h)
+	self.doorLeftEdge = doorImg.getImage(dw, 0, ew, h)
+	self.doorOpenFront = doorImg.getImage(dw+ew, 0, dw, h)
+	self.doorClosedBack = self.doorOpenFront
+	self.doorRightEdge = doorImg.getImage(dw+ew+dw, 0, ew, h)
 end function
 Doorway.prepImages
 
-Doorway.init = function(left, right, cell)
-	super.init left, right, cell
+// Constants for what type of mesh the doorway should use:
+Doorway.typeEmpty = 0
+Doorway.typeClosedBack = 1
+Doorway.typeClosedFront = 2
+Doorway.typeOpenBack = 3
+Doorway.typeOpenFront = 4
 
-	// Create a mesh for the wall/doorway
-	self.wallMesh = new decorations.Mesh
-	self.wallMesh.init [cell.col, cell.row, 0]
-	left = left + [0]
-	right = right + [0]
+Doorway.createMesh = function(meshType, doorOnly=false)
+	mesh = new decorations.Mesh
+	mesh.init [(self.p[0][0] + self.p[1][0])/2, (self.p[0][1] + self.p[1][1])/2, 0.5]
+	
+	openDoorAngle = 10
+	
+	// find the main reference points we will always need
+	left = self.p[0] + [0]
+	right = self.p[1] + [0]
 	leftTop = left.plus([0,0,1])
 	rightTop = right.plus([0,0,1])
 	leftRound = left.rounded
@@ -197,45 +216,111 @@ Doorway.init = function(left, right, cell)
 	doorRightTop = doorRight.plus([0,0,1])
 	back = [sign(left[1] - right[1])*0.1, sign(right[0] - left[0])*0.1, 0]
 	halfBack = back.times(0.5)
-	self.wallMesh.vertices = [left, right, rightTop, leftTop, 
+	
+	if meshType == Doorway.typeOpenFront and doorOnly then
+		// create a mesh for JUST the door, to be used as a cell decoration
+		dx = sign(right[0] - left[0])
+		dy = sign(right[1] - left[1])
+		edgeVec = [0.025*dy, -0.025*dx, 0].rotated(openDoorAngle)
+		doorVec = [-0.25*dx, -0.25*dy, 0].rotated(openDoorAngle)
+		mesh.vertices = [doorLeft, doorLeftJamb,
+			doorLeft.plus(doorVec).plus(edgeVec), doorLeft.plus(edgeVec),
+			doorLeftJamb.plus(edgeVec), doorLeftJamb.plus(doorVec).plus(edgeVec),
+			doorLeft.plus(doorVec), doorLeftJamb.plus(doorVec)]
+		mesh.quads = [
+			[3, 0, 1, 4],		// right edge of door
+			[6, 2, 5, 7],		// left edge of door
+			[2, 3, 4, 5]]		// open door as seen from front
+		mesh.quadTexture = [
+			self.doorRightEdge,
+			self.doorLeftEdge,
+			self.doorOpenFront]
+		return mesh
+	end if
+	
+	// start with the vertices that always apply, even on an empty doorway
+	mesh.vertices = [left, right, rightTop, leftTop, 
 		doorLeft, doorRight, doorRightJamb, doorLeftJamb, doorRightTop, doorLeftTop,
 		doorLeft.plus(back), doorRight.plus(back), 
-		doorRightJamb.plus(back), doorLeftJamb.plus(back),
-		doorLeft.plus(halfBack), doorRight.plus(halfBack), 
-		doorRightJamb.plus(halfBack), doorLeftJamb.plus(halfBack)]
+		doorRightJamb.plus(back), doorLeftJamb.plus(back)]
+	// And the quads for the inside (jamb) of the doorway, which are always drawn first
 	// (...it's best to draw a picture...)
-	self.wallMesh.quads = [
+	mesh.quads = [
 		[4, 10, 13, 7],		// left doorjamb
 		[11, 5, 6, 12],		// right doorjamb
-		[13, 12, 6, 7],		// top (jamb) of doorway
-		[14, 15, 16, 17],	// door itself
-		[0, 4, 9, 3],		// wall to left of door
-		[5, 1, 2, 8],		// wall to right of door
-		[7, 6, 8, 9]]		// wall above doorway
-	self.wallMesh.quadTexture = [
+		[13, 12, 6, 7]]		// top (jamb) of doorway
+	mesh.quadTexture = [
 		self.leftJambImage,
 		self.rightJambImage,
-		self.topJambImage,
-		self.doorImage,
-		self.leftImage,
-		self.rightImage,
-		self.topImage]
+		self.topJambImage]
+		
+	// then, add the door and front walls, depending on the specified mesh type
+	if meshType == Doorway.typeEmpty or meshType == Doorway.typeOpenFront then
+		// Note: with typeOpenFront, we create only the empty doorway here;
+		// call again with doorOnly=true to get the separate door mesh.
+		mesh.quads.push [0, 4, 9, 3]		// wall to left of door
+		mesh.quadTexture.push self.leftImage
+		mesh.quads.push [7, 6, 8, 9]		// wall above doorway
+		mesh.quadTexture.push self.topImage
+	else if meshType == Doorway.typeClosedBack then
+		mesh.quads.push [10, 11, 12, 13]	// back side of door, recessed
+		mesh.quadTexture.push self.doorClosedBack
+		mesh.quads.push [0, 4, 9, 3]		// wall to left of door
+		mesh.quadTexture.push self.leftImage
+		mesh.quads.push [7, 6, 8, 9]		// wall above doorway
+		mesh.quadTexture.push self.topImage
+	else if meshType == Doorway.typeClosedFront then
+		// don't actually need the jambs in this case...
+		mesh.vertices = mesh.vertices[:10]
+		mesh.quads = []; mesh.quadTexture = []
+		mesh.quads.push [0, 4, 9, 3]		// wall to left of door
+		mesh.quadTexture.push self.leftImage
+		mesh.quads.push [7, 6, 8, 9]		// wall above doorway
+		mesh.quadTexture.push self.topImage
+		mesh.quads.push [4, 5, 6, 7]		// front side of door, flush
+		mesh.quadTexture.push self.doorClosedFront
+	else if meshType == Doorway.typeOpenBack then
+		dx = sign(right[0] - left[0])
+		dy = sign(right[1] - left[1])
+		edgeVec = [-0.025*dy, 0.025*dx, 0].rotated(openDoorAngle)
+		mesh.vertices.push doorRight.plus(back).plus(edgeVec)
+		mesh.vertices.push doorRightJamb.plus(back).plus(edgeVec)
+		mesh.quads.push [14, 11, 12, 15]	// right edge of door, seen from back side
+		mesh.quadTexture.push self.doorRightEdge
+		mesh.quads.push [0, 4, 9, 3]		// wall to left of door
+		mesh.quadTexture.push self.leftImage
+		mesh.quads.push [7, 6, 8, 9]		// wall above doorway
+		mesh.quadTexture.push self.topImage
+	else
+		qa.abort "Unknown meshType " + meshType
+	end if
+
+	mesh.quads.push [5, 1, 2, 8]		// wall to right of door
+	mesh.quadTexture.push self.rightImage
+	return mesh
+end function
+
+Doorway.init = function(left, right, cell, type = 0)
+	super.init left, right, cell
 	
-	globals.wtf = self
-	globals.ww = self.wallMesh
+	self.mesh = self.createMesh(type)
+	if type == Doorway.typeOpenFront then
+		cell.decorations.push self.createMesh(type, true)
+	end if
+	
+	self.isClosed = (type == Doorway.typeClosedBack or type == Doorway.typeClosedFront)
 end function
 
 Doorway.render = function(spriteList)
 	self.angles = [camera.relativeAngle(self.p[0]), camera.relativeAngle(self.p[1])]
 	if self.angles[0] < self.angles[1] then return	// facing away
 	if self.angles[1] > camera.halfFovRad or self.angles[0] < -camera.halfFovRad then return // out of view
-	self.wallMesh.render spriteList
+	self.mesh.render spriteList
 end function
 
-Doorway.make = function(left, right, cell)
+Doorway.make = function(left, right, cell, type = 4)
 	w = new Doorway
-	w.init left, right
-		
+	w.init left, right, cell, type
 	return w
 end function
 

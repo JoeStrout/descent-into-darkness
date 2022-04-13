@@ -113,6 +113,30 @@ list.rounded = function(decimalPlaces=0)
 	return result
 end function
 
+// Take this list as a 2D or 3D vector, and rotate the XY values
+// around Z by the given number of degrees counterclockwise (in place).
+list.rotate = function(degrees)
+	x = self[0]; y = self[1]
+	radians = degrees * pi/180
+	cosAng = cos(radians); sinAng = sin(radians)
+	self[0] = x * cosAng - y * sinAng
+	self[1] = x * sinAng + y * cosAng
+end function
+
+// Take this list as a 2D or 3D vector, and return a new list with the
+// the XY values around Z by the given number of degrees counterclockwise.
+list.rotated = function(degrees)
+	x = self[0]; y = self[1]
+	radians = degrees * pi/180
+	cosAng = cos(radians); sinAng = sin(radians)
+	result = self[:]
+	result[0] = x * cosAng - y * sinAng
+	result[1] = x * sinAng + y * cosAng
+	return result
+end function
+
+
+
 runUnitTests = function()
 	ensureImport "qa"
 	qa.assert max(2,5) == 5

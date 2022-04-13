@@ -222,7 +222,7 @@ Mesh.render = function(spriteList)
 		viewVec = camera.pos.minus(self.vertices[quad[0]])
 		normalize viewVec
 		cosAng = viewVec.dot(self.quadNormals[i])
-		//if cosAng < 0 then continue
+		if cosAng < 0 then continue
 		corners = [null,null,null,null]
 		for j in [0,1,2,3]
 			corners[j] = self.screenVerts[quad[j]]
