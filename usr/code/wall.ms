@@ -155,7 +155,7 @@ end function
 Doorway = new Wall
 Doorway.width = 0.5		// (proportion of the total wall width)
 Doorway.height = 0.8	// (same)
-Doorway.doorImage = file.loadImage("/usr/content/textures/doorTemplate.png")
+Doorway.doorImage = file.loadImage("/usr/content/textures/doorTexture.png")
 Doorway.isClosed = false
 Doorway.blocksMovement = function; return self.isClosed; end function
 Doorway.blocksVision = function; return self.isClosed; end function
