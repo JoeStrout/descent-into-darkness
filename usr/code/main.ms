@@ -1,10 +1,10 @@
 import "listUtil"
 import "mathUtil"
-import "microstein"
+import "renderer"
 import "levels"
 
 for identifier in "Renderer camera Cell".split
-	globals[identifier] = microstein[identifier]
+	globals[identifier] = renderer[identifier]
 end for
 
 clear
@@ -87,7 +87,7 @@ while true
 	else 
 		handleInputs
 	end if
-	microstein.rerender
+	renderer.rerender
 	text.row = 25; text.column = 3
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 

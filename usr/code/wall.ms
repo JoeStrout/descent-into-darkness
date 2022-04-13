@@ -138,11 +138,7 @@ Wall.positionSprite = function
 	  
 	// darken the sprite in the distance
 	avgInvD = (self.invD0 + self.invD1)*0.5
-	if avgInvD > 1 then
-		sp.tint = self.tint
-	else
-		sp.tint = color.lerp(self.tint, "#000000", (1 - avgInvD)^5)
-	end if
+	sp.tint = Renderer.darkenForDistance(self.tint, avgInvD)
 	sp.avgInvD = avgInvD
 end function
 

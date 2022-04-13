@@ -7,12 +7,12 @@
 // level-specific functionality.
 
 import "miscUtil"
-ensureImport "microstein"
+ensureImport "renderer"
 ensureImport "decorations"
 ensureImport "qa"
 
 for identifier in "Renderer camera Cell".split
-	globals[identifier] = microstein[identifier]
+	globals[identifier] = renderer[identifier]
 end for
 
 Level = {}
