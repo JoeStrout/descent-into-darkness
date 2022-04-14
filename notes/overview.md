@@ -1,4 +1,4 @@
-## Dungeon Crawl Gameplay Overview
+## Descent into Darkness: Gameplay Overview
 
 This is a real-time roguelike RPG.  Let's break that down:
 
@@ -18,9 +18,12 @@ This is a real-time roguelike RPG.  Let's break that down:
 
 ## Game Controls
 
-- **Mouse/Keyboard**: use mouse to rotate left/right and pitch up/down.  Use WASD to move forward/back and strafe left/right; Q/E to rotate left/right.  Left mouse button: use primary weapon/spell, or while hovering over doors/NPCs/etc., activate/engage.  Right mouse button, or LMB+alt: use secondary item/spell.  (Often a shield, or a defensive/healing spell.)
+- **Mouse/Keyboard**: use mouse to rotate left/right and pitch up/down.  Use WASD to move forward/back and strafe left/right; Q/E to rotate left/right.  Spacebar: use primary weapon/spell, or while hovering over doors/NPCs/etc., activate/engage.  Tab or shift: use secondary item/spell (often a shield or potion).
 
-- **Gamepad**: use left stick or D-pad to move/strafe, right stick to turn and look up/down.  Face buttons act as mouse left/right button.
+(Ideal, if we could do it -- but will have to wait for Mini Micro v1.2: Left mouse button: use primary weapon/spell, or while hovering over doors/NPCs/etc., activate/engage.  Right mouse button, or LMB+alt: use secondary item/spell.)
+
+
+- **Gamepad**: use left stick or D-pad to move/strafe, right stick to turn and look up/down.  Face buttons act as primary/secondary buttons.
 
 
 ## Level Variety

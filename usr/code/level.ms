@@ -35,6 +35,10 @@ Level.clear = function(cols=32, rows=32)
 	self.cells = Cell.make2dArray(cols, rows)
 end function
 
+Level.inBounds = function(col, row)
+	return col >= 0 and col < self.cols and row >= 0 and row < self.rows
+end function
+
 // Add an extended wall, given a leftmost [col,row]
 // point and a rightmost [col,row] point as viewed
 // when looking at the wall.

@@ -3,6 +3,7 @@ import "listUtil"
 import "mathUtil"
 import "renderer"
 import "levels"
+import "spells"
 import "sounds"
 
 for identifier in "Renderer camera Cell".split
@@ -70,7 +71,13 @@ doAction = function
 	end if
 end function
 
+doFire = function
+	// fire (cast) a spell!
+	spells.cast
+end function
+
 wasActionDown = false
+wasFireDown = false
 handleInputs = function
 	hInput = key.axis("Horizontal")
 	vInput = key.axis("Vertical")
@@ -94,10 +101,14 @@ handleInputs = function
 
 	if vInput or hInput then limitCameraMovement prevPos
 	
-	actionDown = key.pressed("space") or key.pressed("left shift") or 
-	  key.pressed("right shift") or key.pressed("tab")
+	actionDown = key.pressed("left shift") or key.pressed("right shift") or key.pressed("tab")
 	if actionDown and not wasActionDown then doAction
 	outer.wasActionDown = actionDown
+	
+	fireDown = key.pressed("space") or key.pressed("return") or key.pressed("enter")
+	if fireDown and not wasFireDown then doFire
+	outer.wasFireDown = fireDown
+	
 end function
 
 // enter the main loop
@@ -108,6 +119,7 @@ while true
 	else 
 		handleInputs
 	end if
+	spells.update
 	renderer.rerender
 	text.row = 25; text.column = 3
 	dir = miscUtil.closestDir(camera.angle)

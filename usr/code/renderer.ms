@@ -374,6 +374,15 @@ camera.moveRight = function(dist)
 	self.pos[0] = self.pos[0] + self.sinAng * dist
 	self.pos[1] = self.pos[1] - self.cosAng * dist
 end function
+camera.forwardVec = function
+	result = [self.cosAng, self.sinAng, 0]
+	// OK, how to get the pitch angle?  We don't *actually* pitch the
+	// camera; we just scroll the screen up and down to create that
+	// illusion.  So we need some kind of fudge factor here.  For now:
+	result[2] = 0.3 * display(4).scrollY / 160
+	normalize(result)
+	return result
+end function
 
 // Calculate the angle (in radians) of the given point, 
 // relative to the camera's forward direction.

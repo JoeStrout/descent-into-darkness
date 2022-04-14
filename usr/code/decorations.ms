@@ -25,6 +25,7 @@ end function
 // Billboard: a simple Decoration that always faces the camera.
 Billboard = new Decoration
 Billboard.sprite = null  // a Sprite
+Billboard.sizeFromBottom = true
 Billboard.init = function(pos, height, image)
 	super.init pos
 	self.height = height
@@ -46,9 +47,13 @@ Billboard.render = function(spriteList)
 	if invD < 0 then return
 	spriteHeight = self.sprite.image.height
 	self.sprite.scale = 300 * self.height * invD / spriteHeight
-	baseY = 320 + (-300 + 600 * self.pos[2]) * invD
 	self.sprite.x = 480 - tan(angle)*1158
-	self.sprite.y = baseY + spriteHeight/2 * self.sprite.scale
+	if self.sizeFromBottom then
+		baseY = 320 + (-300 + 600 * self.pos[2]) * invD
+		self.sprite.y = baseY + spriteHeight/2 * self.sprite.scale
+	else
+		self.sprite.y = 320 + (-300 + 600 * self.pos[2]) * invD
+	end if
 	spriteList.push self.sprite
 end function
 
