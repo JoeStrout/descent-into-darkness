@@ -8,6 +8,7 @@ ensureImport "listUtil"
 ensureImport "mapUtil"
 ensureImport "level"
 ensureImport "wall"
+ensureImport "entities"
 
 randInt = function(min, maxPlus1)
 	return floor(mathUtil.randRange(min, maxPlus1))
@@ -173,13 +174,12 @@ BspLevel.digRoom = function(left, bottom, width, height)
 			roomCells.push cell
 		end for
 	end for
-	if rnd < 0.1 then
+	if rnd < 1 then
 		// add a spider!
 		loc = roomCells.any
-		FlatDecal.make "shadow.png", loc, 0.4
-		spider = Imposter.make("mobs/spider/", loc, 1)
-		spider.pos[2] = -0.15	// (sits better on ground)
-		spider.rotation = round(360 * rnd)
+		spider = new entities.Entity
+		spider.init loc
+		spider.rotateTo round(360 * rnd)
 	end if
 	self.startPos = [round(left+width/2), round(bottom+height/2)]
 	self.nextRoomID = self.nextRoomID + 1

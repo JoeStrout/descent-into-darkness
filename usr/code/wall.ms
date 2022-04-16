@@ -20,6 +20,7 @@ Wall.imageBshort = Wall.imageB.getImage(0, 0, Wall.imageB.width/10, Wall.imageB.
 Wall.sprite = null
 Wall.blocksMovement = true
 Wall.blocksVision = true
+Wall.blocksSpell = true
 Wall.init = function(left, right, cell)
 	qa.assert left.len==2 and right.len==2  // left/right should be 2D floor coordinates
 	self.p = [left, right]

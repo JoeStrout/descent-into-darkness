@@ -25,7 +25,7 @@ Spell.init = function(pos3d)
 	self.cell.decorations.push self.billboard
 	self.startTime = time
 	Spell.instances.push self
-	print "Initialized spell at " + pos3d
+	//print "Initialized spell at " + pos3d
 end function
 
 Spell.die = function
@@ -43,8 +43,15 @@ Spell.update = function(dt=0.1)
 	self.billboard.sprite.rotation = 45 * floor(rnd*8)
 	self.billboard.height = 0.3 + 0.4*rnd
 	pos = self.billboard.pos
+	oldPos = pos[:]
 	pos.add self.velocity.times(dt)
 	if pos[2] < 0 or pos[2] > 1 then
+		self.die
+		return
+	end if
+	hitPt = self.cell.lineSegIntersect(oldPos, pos)
+	if hitPt then
+		//print "Hit wall at " + hitPt
 		self.die
 		return
 	end if

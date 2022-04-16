@@ -311,25 +311,34 @@ Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	end for
 end function
 
-//---------------------------------------------------------------
-// Entity class: represents things that can move around
-// in the game, and always faces the camera directly.
-Entity = new Sprite
-Entity.pos = [0,0]
-Entity.calcAngle = function
-	self.angle = camera.relativeAngle(self.pos)
-	self.invD = 1 / camera.distance(self.pos)
-	self.visible = (self.angle < camera.halfFovRad and 
-	  self.angle > -camera.halfFovRad)
-end function
-Entity.positionSprite = function
-	self.x = 480 - tan(self.angle)*1158  // (1158 ~= 480 / tan(halfFovRad))
-	self.y = 320
-	self.scale = 5 * self.invD
-end function
-Entity.pushSprite = function
-	self.positionSprite
-	display(4).sprites.push self
+// Check whether the given 3D ray intersects any wall of this cell.
+// IMPORTANT: we do not count hitting a wall of the cell from
+// the *backside* (i.e. outside of the cell).  Just like with 
+// rendering, walls are one-sided and you can only hit them from
+// the inside.
+Cell.lineSegIntersect = function(linePtA, linePtB)
+	dx = linePtB[0] - linePtA[0]; dy = linePtB[1] - linePtA[1]
+	col = self.col; row = self.row
+	bestT = 1
+	if dx > 0 and self.walls[dirE] then		// check east wall
+		t = mathUtil.lineIntersectProportion(linePtA, linePtB, [col+1,row], [col+1,row+1])
+		if t > 0 and t < bestT and self.walls[dirE].blocksSpell then bestT = t
+	end if
+	if dx < 0 and self.walls[dirW] then		// check west wall
+		t = mathUtil.lineIntersectProportion(linePtA, linePtB, [col,row], [col,row+1])
+		if t > 0 and t < bestT and self.walls[dirW].blocksSpell then bestT = t
+	end if
+	if dy > 0 and self.walls[dirN] then		// check north wall
+		t = mathUtil.lineIntersectProportion(linePtA, linePtB, [col,row+1], [col+1,row+1])
+		if t > 0 and t < bestT and self.walls[dirN].blocksSpell then bestT = t
+	end if
+	if dy < 0 and self.walls[dirS] then		// check south wall
+		t = mathUtil.lineIntersectProportion(linePtA, linePtB, [col,row], [col+1,row])
+		if t > 0 and t < bestT and self.walls[dirS].blocksSpell then bestT = t
+	end if
+	if bestT >= 1 then return null
+	hitPt = linePtA.plus(linePtB.minus(linePtA).times(bestT))
+	return hitPt
 end function
 
 //===============================================================

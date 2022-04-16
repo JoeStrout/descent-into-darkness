@@ -62,10 +62,9 @@ TestLevel.init = function
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
 
-	FlatDecal.make "shadow.png", self.cells[8][3], 0.4
-	spider = Imposter.make("mobs/spider/", self.cells[8][3], 1)
-	spider.pos[2] = -0.15	// (sits better on ground)
-	spider.rotation = 45
+	spider = new entities.Entity
+	spider.init self.cells[8][3]
+	spider.rotateTo 45
 
 	decorations.Box.make self.cells[3][4], "ToonBrickA.png"
 	
