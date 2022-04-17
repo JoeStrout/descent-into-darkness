@@ -9,6 +9,8 @@ reload = function
 		snd = file.loadSound(path)
 		if snd then outer[fname - ".wav"] = snd
 	end for
+	
+	outer.hit = file.loadSound("/sys/sounds/hit.wav")
 end function
 
 reload

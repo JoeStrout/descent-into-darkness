@@ -20,6 +20,12 @@ Spell.init = function(pos3d)
 	self.billboard = new Billboard
 	self.billboard.init pos3d, 0.5
 	self.billboard.sprite.image = images.sparkle
+	
+	bounds = new Bounds
+	bounds.width = images.sparkle.width * 0.5
+	bounds.height = images.sparkle.height * 0.5	
+	self.billboard.sprite.localBounds = bounds
+	
 	self.billboard.sizeFromBottom = false
 	self.cell = lvl.cells[pos3d[0]][pos3d[1]]
 	self.cell.decorations.push self.billboard
@@ -35,37 +41,59 @@ Spell.die = function
 end function
 
 Spell.update = function(dt=0.1)
+	// check spell lifetime
 	if time > self.startTime + self.lifetime then
 		self.die
 		return
 	end if
 	
+	// update sprite for nice sparkly effect
 	self.billboard.sprite.rotation = 45 * floor(rnd*8)
 	self.billboard.height = 0.3 + 0.4*rnd
+	
+	// move forward
 	pos = self.billboard.pos
 	oldPos = pos[:]
 	pos.add self.velocity.times(dt)
+	// if hit floor or ceiling, we're done
 	if pos[2] < 0 or pos[2] > 1 then
 		self.die
 		return
 	end if
+	// check for hitting a wall
 	hitPt = self.cell.lineSegIntersect(oldPos, pos)
 	if hitPt then
 		//print "Hit wall at " + hitPt
 		self.die
 		return
 	end if
+
+	// make sure still in bounds
 	newCol = floor(pos[0])
 	newRow = floor(pos[1])
+	if not lvl.inBounds(newCol, newRow) then
+		self.die
+		return
+	end if
+	
+	// check for hitting an entity
+	cellsToCheck = [self.cell, lvl.cells[newCol][newRow]]
+	// (ToDo: figure out neighboring cells we'd better check)
+	for c in cellsToCheck
+		for e in c.entities
+			if e.hitBySpell(self) then
+				self.die
+				return
+			end if
+		end for
+	end for
+	
+	// update which cell we're in
 	if newCol != self.cell.col or newRow != self.cell.row then
-		if not lvl.inBounds(newCol, newRow) then
-			self.die
-		else
-			// remove from the old cell, and add ot the new one
-			self.cell.decorations.removeVal self.billboard
-			self.cell = lvl.cells[pos[0]][pos[1]]
-			self.cell.decorations.push self.billboard
-		end if
+		// remove from the old cell, and add ot the new one
+		self.cell.decorations.removeVal self.billboard
+		self.cell = lvl.cells[newCol][newRow]
+		self.cell.decorations.push self.billboard
 	end if
 end function
 

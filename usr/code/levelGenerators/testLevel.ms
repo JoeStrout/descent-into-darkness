@@ -3,6 +3,7 @@
 
 import "miscUtil"
 ensureImport "level"
+ensureImport "entities"
 
 TestDec = new FlatDecal
 TestDec.make = function(cell, scale=1)
@@ -62,7 +63,7 @@ TestLevel.init = function
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
 
-	spider = new entities.Entity
+	globals.spider = new entities.Entity
 	spider.init self.cells[8][3]
 	spider.rotateTo 45
 

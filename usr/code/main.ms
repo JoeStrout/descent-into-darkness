@@ -111,6 +111,10 @@ handleInputs = function
 	
 end function
 
+// set up display 2 for debug drawing
+display(2).mode = displayMode.pixel
+display(2).color = color.fuchsia
+
 // enter the main loop
 while true
 	needRender = true
@@ -120,6 +124,7 @@ while true
 		handleInputs
 	end if
 	spells.update
+	display(2).clear
 	renderer.rerender
 	text.row = 25; text.column = 3
 	dir = miscUtil.closestDir(camera.angle)

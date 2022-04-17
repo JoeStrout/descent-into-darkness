@@ -20,6 +20,10 @@ end function
 Decoration.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	// subclasses should override this
 end function
+Decoration.die = function
+	cell = lvl.cells[self.pos[0]][self.pos[1]]
+	cell.decorations.removeVal self
+end function
 
 //---------------------------------------------------------------
 // Billboard: a simple Decoration that always faces the camera.
@@ -78,7 +82,10 @@ Imposter.make = function(folderPath, cell, height=1.6)
 		img = file.loadImage(file.child(parent, f))
 		if img then dec.images.push img
 	end for
-	cell.decorations.push dec
+	cell.decorations.push dec	
+	dec.sprite.localBounds = new Bounds
+	dec.sprite.localBounds.width = 100
+	dec.sprite.localBounds.height = 60
 	return dec
 end function
 
@@ -95,6 +102,10 @@ Imposter.render = function(spriteList)
 	
 	self.sprite.image = self.images[idx]
 	super.render spriteList
+	
+	if display(2).mode == displayMode.pixel then
+		display(2).drawPoly self.sprite.worldBounds.corners
+	end if
 end function
 
 
