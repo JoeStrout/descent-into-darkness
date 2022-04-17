@@ -5,17 +5,18 @@ import "miscUtil"
 ensureImport "decorations"
 ensureImport "images"
 ensureImport "renderer"
+ensureImport "updatable"
 
-Spell = {}
+Spell = new updatable.Updatable
 Spell.pos = null		// [x,y,z] vector
 Spell.billboard = null
 Spell.velocity = null	// [x,y,z] vector
-Spell.instances = []
 Spell.startTime = 0
 Spell.lifetime = 1.5
 Spell.cell = null
 
 Spell.init = function(pos3d)
+	super.init
 	self.velocity = [0,0,0]
 	self.billboard = new Billboard
 	self.billboard.init pos3d, 0.5
@@ -30,14 +31,13 @@ Spell.init = function(pos3d)
 	self.cell = lvl.cells[pos3d[0]][pos3d[1]]
 	self.cell.decorations.push self.billboard
 	self.startTime = time
-	Spell.instances.push self
 	//print "Initialized spell at " + pos3d
 end function
 
 Spell.die = function
+	super.die
 	pos = self.billboard.pos
 	self.cell.decorations.removeVal self.billboard
-	Spell.instances.removeVal self
 end function
 
 Spell.update = function(dt=0.1)
@@ -106,13 +106,5 @@ cast = function
 	startPos[2] = startPos[2] - 0.2
 	startPos.add forward.times(0.5)
 	sp.init startPos
-	sp.velocity = forward.times(2)
-end function
-
-// spell.update: main update method that should be called from the main 
-// loop.  Update all current spells, including their display.
-update = function(dt=0.1)
-	for sp in Spell.instances
-		sp.update dt
-	end for
+	sp.velocity = forward.times(20)
 end function

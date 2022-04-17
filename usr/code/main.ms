@@ -1,6 +1,7 @@
 import "miscUtil"
 import "listUtil"
 import "mathUtil"
+import "updatable"
 import "renderer"
 import "levels"
 import "spells"
@@ -11,6 +12,12 @@ for identifier in "Renderer camera Cell".split
 end for
 
 clear
+display(7).mode = displayMode.pixel
+display(7).clear color.clear
+// set up display 2 for debug drawing
+display(2).mode = displayMode.pixel
+display(2).color = color.fuchsia
+
 lvl = levels.get(3)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
@@ -20,7 +27,6 @@ gfx.clear color.gray, 960, 960
 gfx.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
 gfx.scrollY = 160
 
-text.color = color.silver
 
 // Limit the camera movement so that it does not pass through
 // walls (or other obstacles).  We're given the old position
@@ -111,10 +117,6 @@ handleInputs = function
 	
 end function
 
-// set up display 2 for debug drawing
-display(2).mode = displayMode.pixel
-display(2).color = color.fuchsia
-
 // enter the main loop
 while true
 	needRender = true
@@ -123,14 +125,16 @@ while true
 	else 
 		handleInputs
 	end if
-	spells.update
+	updatable.update
 	display(2).clear
 	renderer.rerender
 	text.row = 25; text.column = 3
 	dir = miscUtil.closestDir(camera.angle)
+	text.color = color.silver
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
 	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(dir) + ")     "
+	text.color = color.blue
 end while
 key.clear
 text.row = 2

@@ -58,9 +58,10 @@ Entity.hitBySpell = function(spell)
 	if spellDist < myDist then return false
 	if not self.main.sprite.overlaps(spell.billboard.sprite) then return false
 	// We've been hit by this spell!
-	print "HIT!!"
 	sounds.hit.play
 	damage = 5
+	tf = decorations.TextFloater.make(self.cell, self.pos.plus([0,0,0.25]),
+	    "-" + damage, color.red)
 	self.health = self.health - damage
 	if self.health <= 0 then self.die
 	return true

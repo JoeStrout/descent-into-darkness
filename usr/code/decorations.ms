@@ -66,6 +66,44 @@ Billboard.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 end function
 
 //---------------------------------------------------------------
+// TextFloater: a billboard made from text, that floats upwards
+// and fades out after a second or two.  This is typically used
+// to show damage or other effects when you hit an entity.
+TextFloater = new Billboard
+TextFloater.init = function(pos, text, color="#FFFF88")
+	disp = display(7)
+	disp.clear "#00000000"
+	disp.print text, 2, 0, "#000000FF", "large"
+	disp.print text, 0, 2, color, "large"
+	img = disp.getImage(0, 0, 20*text.len+2, 32)
+	super.init pos, 0.1, img
+
+	self.endTime = time + 1
+	updatable.all.push self
+end function
+TextFloater.die = function
+	super.die
+	updatable.all.removeVal self
+end function
+TextFloater.make = function(cell, pos, text, color="#FFFF88")
+	dec = new TextFloater
+	dec.init pos, text, color
+	self.startColor = color
+	self.endColor = color[:7] + "00"	// (clear alpha)
+	cell.decorations.push dec
+	return dec
+end function
+TextFloater.update = function(dt)
+	self.pos[2] = self.pos[2] + 0.25*dt
+	if time > self.endTime then
+		self.die
+	else if time > self.endTime - 0.5 then
+		self.sprite.tint = color.lerp(self.startColor, self.endColor,
+			1 - (self.endTime - time) / 0.5)
+	end if
+end function
+
+//---------------------------------------------------------------
 // Imposter: a billboard that selects one of several (typically 
 // 8 or 16) different renderings of the object as seen from
 // different angles, to give the illusion of a 3D object.
@@ -75,7 +113,7 @@ Imposter.rotation = 0	// angle the object is facing in the world
 
 Imposter.make = function(folderPath, cell, height=1.6)
 	dec = new Imposter
-	dec.init [cell.col, cell.row, 0], height
+	dec.init [cell.col + 0.5, cell.row + 0.5, 0], height
 	dec.images = []
 	parent = "/usr/content/" + folderPath
 	for f in file.children(parent)
@@ -127,7 +165,7 @@ end function
 
 FlatDecal.make = function(imageName, cell, scale=1)
 	dec = new FlatDecal
-	dec.init [cell.col, cell.row, 0], scale
+	dec.init [cell.col + 0.5, cell.row + 0.5, 0], scale
 	dec.sprite.image = file.loadImage("/usr/content/textures/" + imageName)
 	cell.decorations.push dec
 	return dec
