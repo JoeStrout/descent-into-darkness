@@ -39,6 +39,44 @@ Level.inBounds = function(col, row)
 	return col >= 0 and col < self.cols and row >= 0 and row < self.rows
 end function
 
+// Return a list of cells that are reachable from the given
+// cell, without going through walls or closed doors.
+Level.reachableNeighbors = function(cell)
+	result = []
+	for dir in [0,1,2,3]
+		wall = cell.walls[dir]
+		if wall and wall.blocksMovement then continue
+		ncol = cell.col + dirDx[dir]
+		nrow = cell.row + dirDy[dir]
+		result.push self.cells[ncol][nrow]
+	end for
+	return result
+end function
+
+// Find the set of all cells within some distance of the given
+// starting cell, but constrained by walls and closed doors.
+// Returns a map with [col,row] as the keys, and distance (in steps)
+// from the starting cell as values.
+Level.reachablePositions = function(startPos, maxDist=2)
+	if startPos isa map then startPos = [startPos.col, startPos.row]
+	result = {}
+	result[[floor(startPos[0]), floor(startPos[1])]] = 0
+	toDo = []  // list of cells (not positions) to consider
+	toDo.push self.cells[startPos[0]][startPos[1]]
+	while toDo
+		cell = toDo.pull
+		pos = [cell.col, cell.row]
+		newDist = result[pos] + 1
+		for n in self.reachableNeighbors(cell)
+			npos = [n.col, n.row]
+			if result.hasIndex(npos) then continue
+			result[npos] = newDist
+			if newDist < maxDist then toDo.push n
+		end for
+	end while
+	return result
+end function
+
 // Add an extended wall, given a leftmost [col,row]
 // point and a rightmost [col,row] point as viewed
 // when looking at the wall.

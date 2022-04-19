@@ -1,3 +1,6 @@
+ensureImport "updatable"
+ensureImport "images"
+
 
 // State constants -- various states an Entity might be in.
 kIdle = "Idle"
@@ -226,15 +229,15 @@ Mob.update = function(dt)
 end function
 
 Mob.pickWanderTarget = function
-	// For now:
-//	self.targetPos = [self.pos[0] + 4*rnd-2, self.pos[1] + 4*rnd-2, self.pos[2]]
-	if self.pos == self.spawnPos then
-		self.targetPos = [self.pos[0] - 4, self.pos[1], self.pos[2]]
-	else
-		self.targetPos = self.spawnPos
-	end if
+	// Pick a random location within a few steps of our current place.
+	possibilities = lvl.reachablePositions(self.pos).indexes
+	choice = possibilities.any
+	self.targetPos = [choice[0] + 0.5, choice[1] + 0.5, self.pos[2]]
 end function
 
+// Turn towards the given target position.
+// Returns a suggested speed factor (0-1) that you might want to 
+// use if you are trying to move towards that target.
 Mob.turnTowards = function(targetPos, dt)
 	dx = targetPos[0] - self.pos[0]
 	dy = targetPos[1] - self.pos[1]
@@ -253,11 +256,13 @@ Mob.turnTowards = function(targetPos, dt)
 		self.rotateTo mathUtil.moveTowards(self.rotation, self.rotation + dAng, 360*dt)
 		//display(1).print "rot:" + round(prevRot) + "; angleToTarget:" + round(angleToTarget) + "; dAng:" + round(dAng) + "; new rot: " + round(self.rotation)
 	end if
+	return speed
 end function
 
+// Turn towards the given target, and then move towards it.
 Mob.approach = function(targetPos, dt)
-	self.turnTowards targetPos, dt
-	maxDist = 1 * dt
+	speed = self.turnTowards(targetPos, dt)
+	maxDist = 1 * speed * dt
 	if mathUtil.distance(self.pos, targetPos) < maxDist then
 		self.pos[0] = targetPos[0]
 		self.pos[1] = targetPos[1]
@@ -278,6 +283,8 @@ Slime.init = function(cell)
 	self.shadow.setScale 0.2
 	self.main.sprite.tint = "#AAFFAADD"
 	self.main.pos[2] = -0.13	// (sits better on ground)
+	self.walkSets.push self.walkSets[0]
+	self.walkSets.push self.idleSets[0]
 	
 //	self.startAnim self.walkSets
 //	self.state = "DEBUG"
@@ -295,6 +302,7 @@ Spider.init = function(cell)
 	self.main = Imposter.make("mobs/spider/Spider", cell, 1)
 	self.decorations = [self.shadow, self.main]
 	self.main.pos[2] = -0.15	// (sits better on ground)
+	self.main.sprite.localBounds.y = 20
 end function
 Spider.update = function(dt)
 	self.vz = self.vz - 5 * dt

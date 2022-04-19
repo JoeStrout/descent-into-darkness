@@ -594,6 +594,7 @@ rerender = function
 	camera.pos[1] = mathUtil.clamp(camera.pos[1], 0.25, Renderer.cell[0].len-0.25)
 	Renderer.analyze
 	yield
+	display(2).clear color.clear; display(2).scrollY = display(4).scrollY
 	Renderer.render
 end function
 

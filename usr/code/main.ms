@@ -19,7 +19,7 @@ display(2).mode = displayMode.pixel
 display(2).color = color.fuchsia
 display(2).clear color.clear
 
-lvl = levels.get(-1)
+lvl = levels.get(3)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 
@@ -104,6 +104,7 @@ handleInputs = function
 	if mouseY != 0 then
 		gfx.scrollY = mathUtil.clamp(gfx.scrollY + mouseY * 25, 0, 320)
 		display(4).scrollY = gfx.scrollY - 160
+		display(2).scrollY = display(4).scrollY
 	end if
 
 	if vInput or hInput then limitCameraMovement prevPos
@@ -120,21 +121,19 @@ end function
 
 // enter the main loop
 while true
-	needRender = true
 	if key.pressed("escape") then
 		break
 	else 
 		handleInputs
 	end if
 	updatable.update
-	display(2).clear
 	renderer.rerender
 	text.row = 25; text.column = 3
-	dir = miscUtil.closestDir(camera.angle)
+	camDir = miscUtil.closestDir(camera.angle)
 	text.color = color.silver
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
-	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(dir) + ")     "
+	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(camDir) + ")     "
 	text.color = color.orange
 end while
 key.clear
