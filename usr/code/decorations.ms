@@ -111,15 +111,13 @@ Imposter = new Billboard
 Imposter.images = null	// list of images to choose from
 Imposter.rotation = 0	// angle the object is facing in the world
 
-Imposter.make = function(folderPath, cell, height=1.6)
+// Make an imposter from a series of images, identified by
+// a partial path.  For example, "spider/Spider", which would
+// then load spider/Spider-00.png, spider/Spider-01.png, etc.
+Imposter.make = function(partialPath, cell, height=1.6)
 	dec = new Imposter
 	dec.init [cell.col + 0.5, cell.row + 0.5, 0], height
-	dec.images = []
-	parent = "/usr/content/" + folderPath
-	for f in file.children(parent)
-		img = file.loadImage(file.child(parent, f))
-		if img then dec.images.push img
-	end for
+	dec.images = images.loadSeries(partialPath)
 	cell.decorations.push dec	
 	dec.sprite.localBounds = new Bounds
 	dec.sprite.localBounds.width = 100
@@ -136,6 +134,7 @@ Imposter.render = function(spriteList)
 	// If we have two images, they'll be front and back, so use
 	// image 0 for ang < 90 and ang > 270; image 1 for ang < 90 < 270.
 	sections = self.images.len
+	globals.wtf = self
 	idx = round(ang*sections/360) % sections
 	
 	self.sprite.image = self.images[idx]
@@ -154,13 +153,22 @@ FlatDecal.sprite = null  // a Sprite
 FlatDecal.init = function(pos, scale)
 	super.init pos
 	self.sprite = new Sprite
-	x = self.pos[0]
-	y = self.pos[1]
-	h = 0.5 * scale  // (half-width)
-	self.cornerPos = [   // world position of each corner
-	 [x-h, y-h],[x+h, y-h],[x+h, y+h],[x-h, y+h]]
+	self.setScale scale
 	self.angles = [0]*4  // camera-relative angle of each corner
 	self.screenPos = [[0,0],[0,0],[0,0],[0,0]]
+end function
+
+FlatDecal.setScale = function(scale)
+	self.scale = scale
+	self.updateCorners
+end function
+
+FlatDecal.updateCorners = function
+	x = self.pos[0]
+	y = self.pos[1]
+	h = 0.5 * self.scale  // (half-width)
+	self.cornerPos = [   // world position of each corner
+	 [x-h, y-h],[x+h, y-h],[x+h, y+h],[x-h, y+h]]
 end function
 
 FlatDecal.make = function(imageName, cell, scale=1)

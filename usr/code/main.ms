@@ -134,7 +134,7 @@ while true
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
 	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(dir) + ")     "
-	text.color = color.blue
+	text.color = color.orange
 end while
 key.clear
 text.row = 2

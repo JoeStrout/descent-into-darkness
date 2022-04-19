@@ -175,11 +175,11 @@ BspLevel.digRoom = function(left, bottom, width, height)
 		end for
 	end for
 	if rnd < 1 then
-		// add a spider!
+		// add a mob!
 		loc = roomCells.any
-		spider = new entities.Entity
-		spider.init loc
-		spider.rotateTo round(360 * rnd)
+		if rnd < 0.5 then mob = new entities.Spider else mob = new entities.Slime
+		mob.init loc
+		mob.rotateTo round(360 * rnd)
 	end if
 	self.startPos = [round(left+width/2), round(bottom+height/2)]
 	self.nextRoomID = self.nextRoomID + 1
