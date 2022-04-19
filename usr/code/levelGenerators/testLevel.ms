@@ -63,9 +63,9 @@ TestLevel.init = function
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
 
-	globals.spider = new entities.Entity
-	spider.init self.cells[8][3]
-	spider.rotateTo 45
+	globals.mob = new entities.Slime
+	mob.init self.cells[8][3]
+	mob.rotateTo 180
 
 	decorations.Box.make self.cells[3][4], "ToonBrickA.png"
 	

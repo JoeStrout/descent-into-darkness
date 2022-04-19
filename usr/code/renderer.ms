@@ -293,6 +293,9 @@ Cell.render = function(spriteList)
 	for dec in self.decorations
 		dec.render spriteList
 	end for
+	for ent in self.entities
+		ent.render spriteList
+	end for
 end function
 
 Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)

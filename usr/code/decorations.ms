@@ -117,7 +117,7 @@ Imposter.rotation = 0	// angle the object is facing in the world
 Imposter.make = function(partialPath, cell, height=1.6)
 	dec = new Imposter
 	dec.init [cell.col + 0.5, cell.row + 0.5, 0], height
-	dec.images = images.loadSeries(partialPath)
+	if partialPath then dec.images = images.loadSeries(partialPath)
 	cell.decorations.push dec	
 	dec.sprite.localBounds = new Bounds
 	dec.sprite.localBounds.width = 100
@@ -130,12 +130,15 @@ Imposter.render = function(spriteList)
 	angToCam = atan(camera.pos[1] - self.pos[1], camera.pos[0] - self.pos[0]) * radToDeg
 	ang = self.rotation - angToCam
 	ang = (ang + 3600) % 360  // (get ang in range 0-360)
+
 	// Now assume our images evenly divide the circle.
 	// If we have two images, they'll be front and back, so use
 	// image 0 for ang < 90 and ang > 270; image 1 for ang < 90 < 270.
 	sections = self.images.len
 	globals.wtf = self
 	idx = round(ang*sections/360) % sections
+
+	if key.available and key.get=="1" then print "angToCam:"+angToCam + "; self.rot:"+self.rotation + "; ang:"+ang + "; idx:" + idx + "/" + sections
 	
 	self.sprite.image = self.images[idx]
 	super.render spriteList
