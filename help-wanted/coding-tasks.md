@@ -2,8 +2,8 @@ This file lists near-term things-to-do that involve writing new code (or maybe r
 
 ## New Code
 
-- add "pit" decoration (draws a pit/ladder leading down)
-- add "ceiling pit" (leads upwards)
+- enable mobs to attack the player, updating player health
+- add "ceiling pit" decoration (leads upwards)
 - enable traveling between levels
 
 
