@@ -134,7 +134,7 @@ while true
 	dt = time - lastTimestamp
 	lastTimestamp = time
 
-	updatable.update
+	updatable.update dt
 	renderer.rerender
 	text.row = 25; text.column = 3
 	camDir = miscUtil.closestDir(camera.angle)
