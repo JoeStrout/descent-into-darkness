@@ -122,6 +122,8 @@ end function
 //setup timestamp variables
 
 lastTimestamp = time
+recentDt = [1/60] * 30
+recentDtIdx = 0
 
 // enter the main loop
 while true
@@ -133,17 +135,21 @@ while true
 
 	dt = time - lastTimestamp
 	lastTimestamp = time
-
 	updatable.update dt
-	renderer.rerender
+	renderer.rerender		// (includes `yield`)
+
+	recentDt[recentDtIdx] = dt
+	recentDtIdx = (recentDtIdx + 1) % 30
+	fps = 1 / (recentDt.mean)
+
 	text.row = 25; text.column = 3
 	camDir = miscUtil.closestDir(camera.angle)
 	text.color = color.silver
 	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
-	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(camDir) + ")     "
+	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(camDir) + 
+	   ")     FPS: " + round(fps) + "     "
 	text.color = color.orange
-	yield
 end while
 key.clear
 text.row = 2

@@ -35,7 +35,6 @@ end for
 update = function(dt=0.016)
 	// We do the following loop very carefully, in case
 	// some of that update code might alter our `all` list.
-	text.row = 25; text.column = 64; print all.len + "   "
 	if not all then return
 	for i in range(all.len - 1)
 		if i < all.len then all[i].update dt
