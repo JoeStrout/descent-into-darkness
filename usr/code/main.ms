@@ -119,6 +119,10 @@ handleInputs = function
 	
 end function
 
+//setup timestamp variables
+
+lastTimestamp = time
+
 // enter the main loop
 while true
 	if key.pressed("escape") then
@@ -126,7 +130,11 @@ while true
 	else 
 		handleInputs
 	end if
-	updatable.update
+
+	dt = time - lastTimestamp
+	lastTimestamp = time
+
+	updatable.update dt
 	renderer.rerender
 	text.row = 25; text.column = 3
 	camDir = miscUtil.closestDir(camera.angle)
@@ -135,6 +143,7 @@ while true
 	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
 	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(camDir) + ")     "
 	text.color = color.orange
+	yield
 end while
 key.clear
 text.row = 2
