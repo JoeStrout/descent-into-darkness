@@ -282,12 +282,12 @@ Pit.render = function(spriteList)
 		pDown = [pt[0], pt[1]-1]	// (one pixel away, straight down)
 		b = self.screenPos[(i+1)%4]
 		t = mathUtil.lineIntersectProportion(b, pOpposite, pt, pDown)
-		if t != null and t > 0 and t < 1 then
+		if t != null and t >= 0 and t <= 1 then
 			dropPts[i] = mathUtil.lerp2d(b, pOpposite, t)
 		else
 			b = self.screenPos[(i+3)%4]
 			t = mathUtil.lineIntersectProportion(pOpposite, b, pt, pDown)
-			if t != null and t > 0 and t < 1 then
+			if t != null and t >= 0 and t <= 1 then
 				dropPts[i] = mathUtil.lerp2d(pOpposite, b, t)
 			end if
 		end if

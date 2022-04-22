@@ -9,7 +9,7 @@ ensureImport "qa"
 // ordered points: left and right points on the floor
 // (when viewed from the visible side).
 
-Wall = {}
+globals.Wall = {}
 Wall.p = null // 2D floor points, in world coordinates: [left, right]
 Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")

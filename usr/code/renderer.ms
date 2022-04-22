@@ -24,7 +24,6 @@ ensureImport "cell"
 ensureImport "wall"
 ensureImport "decorations"
 
-Wall = wall.Wall
 Decoration = decorations.Decoration
 
 

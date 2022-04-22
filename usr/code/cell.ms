@@ -1,6 +1,8 @@
 // The Cell class represents one square of a level, including any
 // walls, decorations, and entities in that square.
 
+ensureImport "wall"
+
 // Cell class: represents one cell of the map.
 globals.Cell = {}
 // Each cell knows its own row and column.
@@ -32,6 +34,7 @@ Cell.init = function(col, row)
 	self.decorations = []
 	self.entities = []
 	self.cornerPos = [[col,row,0], [col+1,row,0], [col+1,row+1,0], [col,row+1,0]]
+	self.center = [col+0.5, row+0.5, 0]
 	self.angles = [0]*4
 end function
 
@@ -39,7 +42,7 @@ end function
 // Note that the wall so added is inset a bit, and will not join neatly
 // to form a corner with a neighboring wall (but see Cell.fixCorners).
 Cell.addWall = function(dir, wallClass=null)
-	if wallClass == null then wallClass = wall.Wall
+	if wallClass == null then wallClass = Wall
 	w = new wallClass
 	h = 0.05  // inset of wall from edge of cell
 	if dir == dirS then
@@ -182,7 +185,6 @@ Cell.calcAngles = function(containsCamera=false)
 				self.visible = false
 			else
 				self.visible = true
-				if dist < self.minDistSeen then self.minDistSeen = dist
 			end if
 		end if
 	end if
@@ -211,6 +213,10 @@ Cell.writeToDepthBuffer = function(depthBuf)
 			end if
 		end for
 	end for
+	if actuallyVisible then
+		dist = camera.distance(self.center)
+		if dist < self.minDistSeen then self.minDistSeen = dist
+	end if
 	return actuallyVisible
 end function
 
@@ -284,7 +290,11 @@ end function
 
 Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	if self.minDistSeen > 10 or (self.hasIndex("rock") and self.rock) then return
-	c = color.lerp("#88888800", "#88888888", 1 - self.minDistSeen/10)
+	if self.minDistSeen < 4 then
+		c = "#88888888"
+	else
+		c = color.lerp("#88888888", "#88888800", (self.minDistSeen-4)/5)
+	end if
 	gfx.fillRect left + self.col*scaleX, bottom + self.row * scaleY, 
 	  scaleX, scaleY, c
 	for w in self.walls
