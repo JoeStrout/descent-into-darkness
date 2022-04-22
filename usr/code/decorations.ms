@@ -247,12 +247,11 @@ Pit.init = function(pos, scale)
 	super.init pos, scale
 	// We may need up to three sprites to render a pit.
 	// So prepare that many now.
-	img = Image.create(32, 32, color.white)
+	img = Image.create(32, 32, "#FFFFE7")
 	self.sprites = []
 	for i in range(3)
 		sp = new Sprite
 		sp.image = img
-		sp.tint = "#AAAAAA" * (i==1) + "#888888" * (i!=1)
 		self.sprites.push sp
 	end for
 end function
@@ -265,13 +264,12 @@ Pit.make = function(cell, scale=0.5)
 end function
 
 Pit.render = function(spriteList)
+	invD = 1 / camera.distance(self.pos)
+	if invD < 0 then return
 	if not self.calcScreenPos then return
-	// For now, just:
-	//self.sprites[0].setCorners self.screenPos	
-	//spriteList.push self.sprites[0]
-
-//	display(2).drawPoly self.screenPos, color.blue
-
+	
+	//	display(2).drawPoly self.screenPos, color.blue
+	
 	// Try to drop a line down from each end point, to intersect
 	// the two opposite sides.  This will succeed for any point
 	// that is towards the back of the pit (as viewed from the
@@ -294,7 +292,7 @@ Pit.render = function(spriteList)
 			end if
 		end if
 	end for
-		
+	
 	// Now, loop over each side of the pit.  If either end of the side
 	// has a corresponding drop point, then add that to the polygon.
 	// If neither does, just skip this side and move on.
@@ -317,17 +315,17 @@ Pit.render = function(spriteList)
 		if dropPts[i] then polyCorners.push dropPts[i]
 		c = self.screenPos[(i+3)%4]
 		if c[1] < minY and c[0] > minX and c[0] < maxX then polyCorners.push c
-
+		
 		if polyCorners.len == 3 then polyCorners.push polyCorners[-1]	// (sprites need 4 corners)
 		sp = self.sprites[spriteIdx]
 		sp.setCorners polyCorners
 		ca = self.cornerPos[i]; cb = self.cornerPos[nexti]
 		normal = [ca[1]-cb[1], cb[0]-ca[0], 0]
 		normalize(normal)
-		sp.tint = Renderer.tintForNormal(normal)
+		sp.tint = Renderer.darkenForDistance(Renderer.tintForNormal(normal), invD)
 		spriteList.push self.sprites[spriteIdx]
-	
-//		display(2).drawPoly polyCorners, ["#FF0000","#00FF00","#00AAFF"][spriteIdx]
+		
+		//		display(2).drawPoly polyCorners, ["#FF0000","#00FF00","#00AAFF"][spriteIdx]
 		spriteIdx = spriteIdx + 1
 	end for
 end function
@@ -388,7 +386,7 @@ Mesh.render = function(spriteList)
 			end if
 			self.sprites.push spr
 			normal = miscUtil.surfaceNormal(self.vertices[q[0]], self.vertices[q[1]],
-				self.vertices[q[2]])
+			self.vertices[q[2]])
 			self.quadNormals.push normal
 			spr.nearbyTint = Renderer.tintForNormal(normal)
 		end for
@@ -406,7 +404,7 @@ Mesh.render = function(spriteList)
 		spr = self.sprites[i]
 		spr.setCorners corners
 		spr.tint = Renderer.darkenForDistance(spr.nearbyTint, invD)
-
+		
 		spriteList.push spr
 	end for
 end function
@@ -426,11 +424,11 @@ end function
 // A few simple shapes mostly to test the Mesh class.
 Pyramid = new Mesh
 Pyramid.vertices = [
-	[0.1, 0.1, 0],
-	[0.9, 0.1, 0],
-	[0.9, 0.9, 0],
-	[0.1, 0.9, 0],
-	[0.5, 0.5, 0.6]]
+[0.1, 0.1, 0],
+[0.9, 0.1, 0],
+[0.9, 0.9, 0],
+[0.1, 0.9, 0],
+[0.5, 0.5, 0.6]]
 Pyramid.quads = [ [0,1,4,4], [1,2,4,4], [2,3,4,4], [3,0,4,4] ]
 Pyramid.make = function(cell, imageName)
 	result = super.make(cell, new Pyramid)
@@ -440,14 +438,14 @@ end function
 
 Box = new Mesh
 Box.vertices = [
-	[0.2, 0.3, 0],
-	[0.8, 0.3, 0],
-	[0.8, 0.7, 0],
-	[0.2, 0.7, 0],
-	[0.2, 0.3, 0.35],
-	[0.8, 0.3, 0.35],
-	[0.8, 0.7, 0.35],
-	[0.2, 0.7, 0.35]]
+[0.2, 0.3, 0],
+[0.8, 0.3, 0],
+[0.8, 0.7, 0],
+[0.2, 0.7, 0],
+[0.2, 0.3, 0.35],
+[0.8, 0.3, 0.35],
+[0.8, 0.7, 0.35],
+[0.2, 0.7, 0.35]]
 Box.quads = [ [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7], [4,5,6,7] ]
 Box.make = function(cell, imageName)
 	result = super.make(cell, new Box)

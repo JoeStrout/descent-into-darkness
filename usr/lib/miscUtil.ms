@@ -144,8 +144,6 @@ list.rotated = function(degrees)
 	return result
 end function
 
-
-
 runUnitTests = function()
 	ensureImport "qa"
 	qa.assert max(2,5) == 5

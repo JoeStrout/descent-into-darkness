@@ -7,13 +7,10 @@
 // level-specific functionality.
 
 import "miscUtil"
+ensureImport "cell"
 ensureImport "renderer"
 ensureImport "decorations"
 ensureImport "qa"
-
-for identifier in "Renderer camera Cell".split
-	globals[identifier] = renderer[identifier]
-end for
 
 Level = {}
 Level.cols = 32
@@ -168,12 +165,24 @@ Level.debugDraw = function(left=100, bottom=0, width=640, height=860)
 		gfx.print s, left + 28 - s.len*8, bottom+20 + (row+0.2)*cellScale, color.silver, "small"
 		rowCells = self.cells[row]
 		for cell in rowCells
-			cell.drawInMap left+30, bottom+20, cellScale, cellScale
+			cell.debugDraw left+30, bottom+20, cellScale, cellScale
 		end for
 	end for
 	for col in self.cells[0].indexes
 		s = str(col)
 		gfx.print s, left+28 + (col+0.5)*cellScale - s.len*4, bottom+4, color.silver, "small"	
+	end for
+end function
+
+// Draw this level as it should appear in a map for the user.  That means,
+// among other things, that we only draw cells that have been rendered,
+// and we fade them out if they have only been glimpsed far away.
+Level.drawMap = function(left=100, bottom=0, width=640, height=860)
+	cellScale = min(width/self.cols, height/self.rows)
+	for row in self.cells.indexes
+		for cell in self.cells[row]
+			cell.drawInMap left, bottom, cellScale, cellScale
+		end for
 	end for
 end function
 

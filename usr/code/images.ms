@@ -5,7 +5,10 @@
 vfxFolder = "/usr/content/vfx"
 sparkle = file.loadImage(file.child(vfxFolder, "sparkle.png"))
 
+uiFolder = "/usr/content/ui"
+parchment = file.loadImage(file.child(uiFolder, "parchment_alpha.png"))
 
+playerIndicator = file.loadImage("/sys/pics/arrows/arrow2.png")
 
 // Load an image given a path (under /usr/content unless
 // you specify otherwise).  Uses a cache, so feel free to

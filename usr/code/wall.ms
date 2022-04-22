@@ -40,7 +40,8 @@ end function
 
 Wall.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 	gfx.line left + self.p[0][0]*scaleX, bottom + self.p[0][1]*scaleY,
-			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.tint
+			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY,
+			 "#444444", 3
 end function
 
 // Call this method when a wall extends beyond the left end of the screen.
@@ -371,18 +372,28 @@ Doorway.make = function(left, right, cell, type = 4)
 end function
 
 Doorway.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	dx = sign(self.p[1][0] - self.p[0][0])
-	dy = sign(self.p[1][1] - self.p[0][1])
-	if dx then
-		a = [round(self.p[0][0]) + 0.25 * dx, self.p[0][1]]
-		b = [round(self.p[0][0]) + 0.75 * dx, self.p[1][1]]
-	else
-		a = [self.p[0][0], round(self.p[0][1]) + 0.25 * dy]
-		b = [self.p[0][0], round(self.p[0][1]) + 0.75 * dy]
-	end if
+	super.drawInMap left, bottom, scaleX, scaleY
+	rp0 = self.p[0].rounded
+	rp1 = self.p[1].rounded
+	a = mathUtil.lerp2d(rp0, rp1, 0.3)
+	b = mathUtil.lerp2d(rp0, rp1, 0.7)
+	x = min(a[0], b[0]); y = min(a[1], b[1])
+	if self.isClosed then c = "#FF0000" else c = "#00FF00"
+	gfx.drawRect left + x*scaleX-2, bottom + y*scaleY-2,
+		abs(b[0]-a[0])*scaleX+4, abs(b[1]-a[1])*scaleY+4, c, 2
 	
-	gfx.line left + self.p[0][0]*scaleX, bottom + self.p[0][1]*scaleY,
-			 left + a[0]*scaleX, bottom + a[1]*scaleY, self.tint
-	gfx.line left + b[0]*scaleX, bottom + b[1]*scaleY,
-			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.tint
+//	dx = sign(self.p[1][0] - self.p[0][0])
+//	dy = sign(self.p[1][1] - self.p[0][1])
+//	if dx then
+//		a = [round(self.p[0][0]) + 0.25 * dx, self.p[0][1]]
+//		b = [round(self.p[0][0]) + 0.75 * dx, self.p[1][1]]
+//	else
+//		a = [self.p[0][0], round(self.p[0][1]) + 0.25 * dy]
+//		b = [self.p[0][0], round(self.p[0][1]) + 0.75 * dy]
+//	end if
+//	
+//	gfx.line left + self.p[0][0]*scaleX, bottom + self.p[0][1]*scaleY,
+//			 left + a[0]*scaleX, bottom + a[1]*scaleY, self.tint
+//	gfx.line left + b[0]*scaleX, bottom + b[1]*scaleY,
+//			 left + self.p[1][0]*scaleX, bottom + self.p[1][1]*scaleY, self.tint
 end function

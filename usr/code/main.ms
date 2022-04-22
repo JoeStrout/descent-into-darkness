@@ -7,9 +7,8 @@ import "levels"
 import "spells"
 import "sounds"
 
-for identifier in "Renderer camera Cell".split
-	globals[identifier] = renderer[identifier]
-end for
+Renderer = renderer.Renderer
+camera = renderer.camera
 
 clear
 display(7).mode = displayMode.pixel
@@ -19,7 +18,7 @@ display(2).mode = displayMode.pixel
 display(2).color = color.fuchsia
 display(2).clear color.clear
 
-lvl = levels.get(-1)			// <=== defines the starting level
+lvl = levels.get(3)			// <=== defines the starting level
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 
@@ -83,6 +82,48 @@ doFire = function
 	spells.cast
 end function
 
+showMap = function
+	// parchment
+	display(3).mode = displayMode.pixel
+	display(3).clear "#00000044"
+	display(3).drawImage images.parchment, 480-images.parchment.width/2, 320-images.parchment.height/2
+	display(2).mode = displayMode.pixel
+
+	// level
+	mapMidX = 480-15
+	mapMidY = 320-6
+	mapSize = 384
+	mapLeft = mapMidX - mapSize/2
+	mapBottom = mapMidY - mapSize/2
+	globals.gfx = display(2)
+	gfx.clear color.clear
+	lvl.drawMap mapLeft, mapBottom, mapSize, mapSize
+	
+	// player indicator
+	display(1).mode = displayMode.sprite
+	display(1).clear
+	playerInd = new Sprite
+	playerInd.image = images.playerIndicator
+	playerInd.scale = 0.1
+	playerInd.x = mapLeft + camera.pos[0] * mapSize/lvl.cols
+	playerInd.y = mapBottom + camera.pos[1] * mapSize/lvl.rows
+	playerInd.rotation = camera.angle
+	display(1).sprites.push playerInd
+		
+	while key.pressed("m"); yield; end while; key.clear
+	
+	gfx.print "Press any key", 650, 105, "#555522AA", "small"
+	while not key.available
+		playerInd.scale = 1/8 + 0.01 * sin(time*3)
+		yield
+	end while
+	key.clear
+	while key.pressed("m"); yield; end while; key.clear
+	display(3).mode = displayMode.text
+	globals.gfx = display(5)
+	display(1).mode = displayMode.text
+end function
+
 wasActionDown = false
 wasFireDown = false
 handleInputs = function
@@ -117,6 +158,8 @@ handleInputs = function
 	if fireDown and not wasFireDown then doFire
 	outer.wasFireDown = fireDown
 	
+	if key.pressed("m") then showMap
+	
 end function
 
 //setup timestamp variables
@@ -135,7 +178,7 @@ while true
 
 	dt = time - lastTimestamp
 	lastTimestamp = time
-	updatable.update dt
+	updatable.update min(dt, 0.1)
 	renderer.rerender		// (includes `yield`)
 
 	recentDt[recentDtIdx] = dt
