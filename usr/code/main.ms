@@ -19,7 +19,7 @@ display(2).mode = displayMode.pixel
 display(2).color = color.fuchsia
 display(2).clear color.clear
 
-lvl = levels.get(3)
+lvl = levels.get(-1)			// <=== defines the starting level
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 

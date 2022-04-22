@@ -39,7 +39,7 @@ end function
 
 Billboard.make = function(imagePath, cell, height=1.6)
 	dec = new Billboard
-	dec.init [cell.col, cell.row, 0], height
+	dec.init [cell.col + 0.5, cell.row + 0.5, 0], height
 	dec.sprite.image = file.loadImage("/usr/content/" + imagePath)
 	cell.decorations.push dec
 	return dec
@@ -62,7 +62,10 @@ Billboard.render = function(spriteList)
 end function
 
 Billboard.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	// ToDo
+	x = left + self.pos[0]*scaleX
+	y = bottom + self.pos[1]*scaleY
+	r = 0.3 * scaleX
+	gfx.drawEllipse x-r, y-r, r*2, r*2, color.silver
 end function
 
 //---------------------------------------------------------------
@@ -174,10 +177,12 @@ FlatDecal.updateCorners = function
 	 [x-h, y-h],[x+h, y-h],[x+h, y+h],[x-h, y+h]]
 end function
 
-FlatDecal.make = function(imageName, cell, scale=1)
+FlatDecal.make = function(imageName, cell, scale=0.5)
 	dec = new FlatDecal
 	dec.init [cell.col + 0.5, cell.row + 0.5, 0], scale
-	dec.sprite.image = file.loadImage("/usr/content/textures/" + imageName)
+	if imageName then
+		dec.sprite.image = file.loadImage("/usr/content/textures/" + imageName)
+	end if
 	cell.decorations.push dec
 	return dec
 end function
@@ -196,9 +201,11 @@ FlatDecal.calcAngles = function
 	if self.minAngle < -halfPi and self.maxAngle > halfPi then self.visible = false
 end function
 
-FlatDecal.render = function(spriteList)
+// Update self.screenPos with the screen position of our corners.
+// Return true if the result is visible on screen, false if not.
+FlatDecal.calcScreenPos = function
 	self.calcAngles
-	if not self.visible then return
+	if not self.visible then return false
 	midAngle = (self.minAngle + self.maxAngle)/2
 	self.sprite.x = 480 - tan(midAngle)*1158
 	self.sprite.y = 320
@@ -213,12 +220,116 @@ FlatDecal.render = function(spriteList)
 		// screen, similar to how we do with walls when they go off
 		// the left and right sides.
 	end for
+	return true
+end function
+
+FlatDecal.render = function(spriteList)
+	if not self.calcScreenPos then return
 	self.sprite.setCorners self.screenPos	
 	spriteList.push self.sprite
 end function
 
 FlatDecal.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	// ToDo
+	screenCoords = []
+	for c in self.cornerPos
+		screenCoords.push [left + c[0]*scaleX, bottom + c[1]*scaleY]
+	end for
+	gfx.fillPoly screenCoords, "#CCCCCC88"
+end function
+
+//---------------------------------------------------------------
+// Pit: similar to a flat decal, except that we actually render
+// a separate little polygon for each side that's away from the
+// camera, to give the illusion of a pit in the floor.
+Pit = new FlatDecal
+
+Pit.init = function(pos, scale)
+	super.init pos, scale
+	// We may need up to three sprites to render a pit.
+	// So prepare that many now.
+	img = Image.create(32, 32, color.white)
+	self.sprites = []
+	for i in range(3)
+		sp = new Sprite
+		sp.image = img
+		sp.tint = "#AAAAAA" * (i==1) + "#888888" * (i!=1)
+		self.sprites.push sp
+	end for
+end function
+
+Pit.make = function(cell, scale=0.5)
+	dec = new Pit
+	dec.init [cell.col + 0.5, cell.row + 0.5, 0], scale
+	cell.decorations.push dec
+	return dec
+end function
+
+Pit.render = function(spriteList)
+	if not self.calcScreenPos then return
+	// For now, just:
+	//self.sprites[0].setCorners self.screenPos	
+	//spriteList.push self.sprites[0]
+
+//	display(2).drawPoly self.screenPos, color.blue
+
+	// Try to drop a line down from each end point, to intersect
+	// the two opposite sides.  This will succeed for any point
+	// that is towards the back of the pit (as viewed from the
+	// camera), bordering some visible wall of the pit.
+	dropPts = [null]*4
+	for i in [0,1,2,3]
+		pt = self.screenPos[i]
+		pOpposite = self.screenPos[(i+2)%4]
+		if pOpposite[1] > pt[1] then continue
+		pDown = [pt[0], pt[1]-1]	// (one pixel away, straight down)
+		b = self.screenPos[(i+1)%4]
+		t = mathUtil.lineIntersectProportion(b, pOpposite, pt, pDown)
+		if t != null and t > 0 and t < 1 then
+			dropPts[i] = mathUtil.lerp2d(b, pOpposite, t)
+		else
+			b = self.screenPos[(i+3)%4]
+			t = mathUtil.lineIntersectProportion(pOpposite, b, pt, pDown)
+			if t != null and t > 0 and t < 1 then
+				dropPts[i] = mathUtil.lerp2d(pOpposite, b, t)
+			end if
+		end if
+	end for
+		
+	// Now, loop over each side of the pit.  If either end of the side
+	// has a corresponding drop point, then add that to the polygon.
+	// If neither does, just skip this side and move on.
+	spriteIdx = 0
+	for i in [0,1,2,3]
+		nexti = (i+1) % 4
+		if not dropPts[i] and not dropPts[nexti] then continue
+		a = self.screenPos[i]
+		b = self.screenPos[nexti]
+		minY = min(a[1], b[1])
+		if a[0] < b[0] then
+			minX = a[0]; maxX = b[0]
+		else
+			minX = b[0]; maxX = a[0]
+		end if
+		polyCorners = [a, b]
+		if dropPts[nexti] then polyCorners.push dropPts[nexti]
+		c = self.screenPos[(i+2)%4]
+		if c[1] < minY and c[0] > minX and c[0] < maxX then polyCorners.push c
+		if dropPts[i] then polyCorners.push dropPts[i]
+		c = self.screenPos[(i+3)%4]
+		if c[1] < minY and c[0] > minX and c[0] < maxX then polyCorners.push c
+
+		if polyCorners.len == 3 then polyCorners.push polyCorners[-1]	// (sprites need 4 corners)
+		sp = self.sprites[spriteIdx]
+		sp.setCorners polyCorners
+		ca = self.cornerPos[i]; cb = self.cornerPos[nexti]
+		normal = [ca[1]-cb[1], cb[0]-ca[0], 0]
+		normalize(normal)
+		sp.tint = Renderer.tintForNormal(normal)
+		spriteList.push self.sprites[spriteIdx]
+	
+//		display(2).drawPoly polyCorners, ["#FF0000","#00FF00","#00AAFF"][spriteIdx]
+		spriteIdx = spriteIdx + 1
+	end for
 end function
 
 //---------------------------------------------------------------

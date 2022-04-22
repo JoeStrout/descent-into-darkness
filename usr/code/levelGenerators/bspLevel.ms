@@ -32,6 +32,9 @@ BspLevel.init = function
 	end for
 	self.nextRoomID = 1
 	
+	// Keep track of possible pit locations.
+	self.possiblePits = []
+	
 	// Now dig the rooms and passages.
 	self.generate
 	
@@ -40,6 +43,9 @@ BspLevel.init = function
 	
 	// Fix any tiny (size=1) rooms.
 	self.fixTinyPassages
+	
+	// Dig the pit to the next level.
+	decorations.Pit.make self.possiblePits.any
 	
 	// Finally, build walls based on the rock attribute and IDs.
 	joined = {}  // key: [roomA,roomB]; value: [cell,dir] that should be converted to Doorway
@@ -181,7 +187,11 @@ BspLevel.digRoom = function(left, bottom, width, height)
 		mob.init loc
 		mob.rotateTo round(360 * rnd)
 	end if
+	// Note a possible location for a pit.
+	self.possiblePits.push roomCells.any
+	// Set the start pos here (only the last one will stick).
 	self.startPos = [round(left+width/2), round(bottom+height/2)]
+
 	self.nextRoomID = self.nextRoomID + 1
 end function
 

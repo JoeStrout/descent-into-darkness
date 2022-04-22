@@ -60,6 +60,8 @@ TestLevel.init = function
 	cobble = FlatDecal.make("floorCobble1.png", self.cells[3][3])
 	cobble.sprite.tint = color.gray
 	
+	globals.pit = decorations.Pit.make(self.cells[3][2])
+	
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
 
