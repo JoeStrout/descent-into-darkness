@@ -1,6 +1,6 @@
 ensureImport "updatable"
 ensureImport "images"
-
+ensureImport "qa"
 
 // State constants -- various states an Entity might be in.
 kIdle = "Idle"
@@ -73,8 +73,6 @@ Entity.die = function
 	self.cell.entities.removeVal self
 	self.shadow.die
 	self.main.die
-	
-	FlatDecal.make("splat.png", self.cell, 0.4)
 end function
 
 // Determine whether the given spell hits this entity.
@@ -131,6 +129,8 @@ Mob.curSets = null		// what set of frames we are currently using
 Mob.frameNum = 0		// current frame (image set) we're showing
 Mob.nextFrameTime = 0	// time at which we should go to the next frame
 Mob.targetPos = null	// target position in kWander or kChase state
+Mob.splatImage = "splat.png"
+Mob.splatTint = "#444400"
 
 Mob.loadImageSets = function(partialPath)
 	self.idleSets = []
@@ -272,29 +272,64 @@ Mob.approach = function(targetPos, dt)
 	end if
 end function
 
+Mob.die = function
+	super.die
+	splat = FlatDecal.make("splat.png", self.cell, 0.4)
+	splat.pos = self.pos
+	splat.sprite.tint = self.splatTint
+end function
+
 //---------------------------------------------------------------
 // Slime
 // Small.  Squishy.  Squelchy.
 Slime = new Mob
+Slime.level = 0
 Slime.health = 5
 Slime.loadImageSets "mobs/Slime/Slime"
-Slime.init = function(cell)
+Slime.levelColors = ["#AAFFAADD", "#FFFF88DD", "#FF6666DD", "#AAAAFFDD"]
+Slime.instances = []	// (list of all slimes in the level)
+
+Slime.init = function(cell, level=0)
 	super.init cell
 	self.shadow.setScale 0.2
-	self.main.sprite.tint = "#AAFFAADD"
 	self.main.pos[2] = -0.13	// (sits better on ground)
 	self.walkSets.push self.walkSets[0]
 	self.walkSets.push self.idleSets[0]
-	
-//	self.startAnim self.walkSets
-//	self.state = "DEBUG"
+	self.setLevel level
+	Slime.instances.push self
 end function
 
+Slime.setLevel = function(level)
+	qa.assert level >= 0 and level < Slime.levelColors.len
+	self.level = level
+	self.health = 5 + 2^level
+	self.main.sprite.tint = Slime.levelColors[level]
+end function
+
+Slime.splatTint = function
+	return self.main.sprite.tint
+end function
+
+Slime.die = function
+	super.die
+	Slime.instances.removeVal self
+	// When one slime dies, other slimes level up!
+	qtyToUpgrade = 4
+	Slime.instances.shuffle
+	if Slime.instances.len > qtyToUpgrade then
+		others = Slime.instances[:qtyToUpgrade]
+	else
+		others = Slime.instances
+	end if
+	for other in others
+		if other.level < Slime.levelColors.len then other.setLevel other.level+1
+	end for
+end function
 
 //---------------------------------------------------------------
 // Spider
 // It jumps.  It hisses.  It bites.
-Spider = new Entity
+Spider = new Mob
 Spider.health = 15
 Spider.vz = 0
 Spider.init = function(cell)
