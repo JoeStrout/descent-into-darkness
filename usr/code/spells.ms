@@ -104,7 +104,7 @@ cast = function
 	forward = renderer.camera.forwardVec
 	startPos = renderer.camera.pos[:]
 	startPos[2] = startPos[2] - 0.2
-	startPos.add forward.times(0.5)
+	startPos.add forward.times(0.15)
 	sp.init startPos
 	sp.velocity = forward.times(20)
 end function

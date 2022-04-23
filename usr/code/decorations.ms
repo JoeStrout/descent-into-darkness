@@ -138,7 +138,6 @@ Imposter.render = function(spriteList)
 	// If we have two images, they'll be front and back, so use
 	// image 0 for ang < 90 and ang > 270; image 1 for ang < 90 < 270.
 	sections = self.images.len
-	globals.wtf = self
 	idx = round(ang*sections/360) % sections
 
 	if key.available and key.get=="1" then print "angToCam:"+angToCam + "; self.rot:"+self.rotation + "; ang:"+ang + "; idx:" + idx + "/" + sections
@@ -156,8 +155,8 @@ end function
 // FlatDecal: a Decoration that lays flat on the floor or ceiling.
 FlatDecal = new Decoration
 FlatDecal.sprite = null  // a Sprite
-FlatDecal.init = function(pos, scale=1)
-	super.init pos
+FlatDecal.init = function(cell, scale=1)
+	super.init cell
 	self.sprite = new Sprite
 	self.setScale scale
 	self.angles = [0]*4  // camera-relative angle of each corner

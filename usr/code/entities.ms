@@ -1,6 +1,7 @@
 ensureImport "updatable"
 ensureImport "images"
 ensureImport "qa"
+ensureImport "sounds"
 
 // State constants -- various states an Entity might be in.
 kIdle = "Idle"
@@ -40,6 +41,14 @@ Entity.render = function(spriteList)
 	for dec in self.decorations
 		dec.render spriteList
 	end for
+end function
+
+Entity.playSound = function(sound)
+	d = mathUtil.distance(self.pos, camera.pos)
+	if d > 5 then return
+	vol = 1/d
+	pan = -sin(camera.relativeAngle(self.pos))
+	sound.play vol, pan
 end function
 
 Entity.rotateTo = function(rotation)
@@ -84,7 +93,7 @@ Entity.hitBySpell = function(spell)
 	if spellDist < myDist then return false
 	if not self.main.sprite.overlaps(spell.billboard.sprite) then return false
 	// We've been hit by this spell!
-	sounds.hit.play
+	self.playSound sounds.hit
 	damage = 5
 	tf = decorations.TextFloater.make(self.cell, self.pos.plus([0,0,0.25]),
 	    "-" + damage, color.red)
@@ -124,7 +133,7 @@ Mob.walkSets = null		// walk frames
 Mob.runSets = null		// running frames
 Mob.attackSets = null	// attack frames
 Mob.attackDamage = 5	// hit points of damage we do to player
-Mob.angry = false		// if true, attacks on site; if false, ignores player
+Mob.aggressive = false	// if true, attacks on site; if false, ignores player
 Mob.curSets = null		// what set of frames we are currently using
 Mob.frameNum = 0		// current frame (image set) we're showing
 Mob.nextFrameTime = 0	// time at which we should go to the next frame
@@ -132,6 +141,14 @@ Mob.targetPos = null	// target position in kWander or kChase state
 Mob.splatImage = "splat.png"
 Mob.splatTint = "#444400"
 Mob.splatScale = 0.35
+Mob.walkSpeed = 0.5
+Mob.runSpeed = 1
+Mob.lastRenderTime = 0
+Mob.lastRoarTime = 0
+Mob.moveSound = null
+Mob.roarSound = null
+Mob.attackSound = null
+Mob.deathSound = sounds.splat
 
 Mob.loadImageSets = function(partialPath)
 	self.idleSets = []
@@ -180,8 +197,6 @@ Mob.init = function(cell)
 	self.startAnim self.idleSets
 end function
 
-display(1).mode = displayMode.text
-
 Mob.startAnim = function(imageSets)
 	self.curSets = imageSets
 	self.frameNum = -1
@@ -198,34 +213,53 @@ Mob.enterState = function(newState)
 		self.pickWanderTarget
 	else if self.state == kChasing then
 		self.startAnim self.runSets
+		if self.roarSound and self.lastRoarTime < time - 10 then
+			self.playSound self.roarSound
+			self.lastRoarTime = time
+		end if
 	else if self.state == kAttacking then
 		self.startAnim self.attackSets
+		if self.attackSound then self.playSound self.attackSound
 	end if
 end function
 
 Mob.update = function(dt)
+	animWrapped = false
 	if time > self.nextFrameTime then
 		self.nextFrameTime = time + 0.3
-		self.frameNum = (self.frameNum + 1) % self.curSets.len
+		self.frameNum = self.frameNum + 1
+		if self.frameNum >= self.curSets.len then
+			self.frameNum = 0
+			animWrapped = true
+		end if
 		self.main.images = self.curSets[self.frameNum]
 	end if
 	
+	playerPos = camera.pos
 	if self.state == kIdle then
-		if self.timeInState > 3 then
+		if self.aggressive and self.lastRenderTime > time - 0.2 then
+			self.enterState kChasing
+		else if self.timeInState > 3 then
 			self.enterState kWandering
 		end if
 	else if self.state == kWandering then
-		if self.pos == self.targetPos then
+		if self.aggressive and self.lastRenderTime > time - 0.2 then
+			self.enterState kChasing
+		else if self.pos == self.targetPos then
 			self.enterState kIdle
 		else
 			self.approach self.targetPos, dt
+			if animWrapped and self.moveSound then self.playSound self.moveSound
 		end if
 	else if self.state == kChasing then
-		if self.pos == self.targetPos then
-			self.enterState kAttack
+		if manhattanDist(self.pos, playerPos) < 1.5 then
+			self.enterState kAttacking
 		else
-			self.approach self.targetPos, dt
+			self.approach playerPos, dt
+			if animWrapped and self.moveSound then self.playSound self.moveSound
 		end if
+	else if self.state == kAttacking then
+		if animWrapped then self.enterState kIdle
 	end if
 end function
 
@@ -262,21 +296,41 @@ end function
 
 // Turn towards the given target, and then move towards it.
 Mob.approach = function(targetPos, dt)
-	speed = self.turnTowards(targetPos, dt)
-	maxDist = 1 * speed * dt
+	if self.state == kWandering then baseSpeed = self.walkSpeed else baseSpeed = self.runSpeed
+	speed = baseSpeed * self.turnTowards(targetPos, dt)
+	maxDist = speed * dt
 	if mathUtil.distance(self.pos, targetPos) < maxDist then
 		self.pos[0] = targetPos[0]
 		self.pos[1] = targetPos[1]
 	else
 		fwd = self.forwardVec.times(maxDist)
-		self.moveTo self.pos[0] + fwd[0], self.pos[1] + fwd[1]
+		newx = self.pos[0] + fwd[0]
+		newy = self.pos[1] + fwd[1]
+		if floor(newx) != self.cell.col then
+			if fwd[0] < 0 then dir = dirW else dir = dirE
+			wall = self.cell.walls[dir]
+			if wall != null and wall.blocksMovement then newx = self.pos[0]
+		end if
+		if floor(newy) != self.cell.row then
+			if fwd[1] < 0 then dir = dirS else dir = dirN
+			wall = self.cell.walls[dir]
+			if wall != null and wall.blocksMovement then newy = self.pos[1]
+		end if			
+		self.moveTo newx, newy
 	end if
+end function
+
+Mob.render = function(spriteList)
+	self.lastRenderTime = time
+	super.render spriteList
 end function
 
 Mob.die = function
 	super.die
+	if self.deathSound then self.playSound self.deathSound
 	splat = FlatDecal.make("splat.png", self.cell, self.splatScale)
 	splat.pos = self.pos
+	splat.updateCorners
 	splat.sprite.tint = self.splatTint
 end function
 
@@ -287,16 +341,19 @@ Slime = new Mob
 Slime.level = 0
 Slime.health = 5
 Slime.loadImageSets "mobs/Slime/Slime"
+Slime.walkSets.push Slime.walkSets[0]	// (add two extra frames to
+Slime.walkSets.push Slime.idleSets[0]	//  the walk set)
 Slime.levelColors = ["#AAFFAADD", "#FFFF88DD", "#FF6666DD", "#AAAAFFDD"]
 Slime.instances = []	// (list of all slimes in the level)
 Slime.splatScale = 0.2
+Slime.moveSound = sounds.slimeMove
+Slime.roarSound = sounds.slimeRoar
+Slime.attackSound = sounds.slimeAttack
 
 Slime.init = function(cell, level=0)
 	super.init cell
 	self.shadow.setScale 0.2
 	self.main.pos[2] = -0.13	// (sits better on ground)
-	self.walkSets.push self.walkSets[0]
-	self.walkSets.push self.idleSets[0]
 	self.setLevel level
 	Slime.instances.push self
 end function
@@ -306,6 +363,7 @@ Slime.setLevel = function(level)
 	self.level = level
 	self.health = 4 + 2^level
 	self.main.sprite.tint = Slime.levelColors[level]
+	self.aggressive = (level > 0)
 	self.splatScale = 0.2 + 0.04*level
 end function
 
@@ -325,7 +383,7 @@ Slime.die = function
 		others = Slime.instances
 	end if
 	for other in others
-		if other.level < Slime.levelColors.len then other.setLevel other.level+1
+		if other.level+1 < Slime.levelColors.len then other.setLevel other.level+1
 	end for
 end function
 

@@ -73,6 +73,10 @@ globals.normalize = function(v)
 	end for
 end function
 
+globals.manhattanDist = function(ptA, ptB)
+	return abs(ptA[0] - ptB[0]) + abs(ptA[1] - ptB[1])
+end function
+
 // Find the normal (i.e. a unit-length perpendicular vector) to
 // a surface defined by three 3D points.
 surfaceNormal = function(ptA, ptB, ptC)
