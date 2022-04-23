@@ -131,6 +131,7 @@ Mob.nextFrameTime = 0	// time at which we should go to the next frame
 Mob.targetPos = null	// target position in kWander or kChase state
 Mob.splatImage = "splat.png"
 Mob.splatTint = "#444400"
+Mob.splatScale = 0.35
 
 Mob.loadImageSets = function(partialPath)
 	self.idleSets = []
@@ -274,7 +275,7 @@ end function
 
 Mob.die = function
 	super.die
-	splat = FlatDecal.make("splat.png", self.cell, 0.4)
+	splat = FlatDecal.make("splat.png", self.cell, self.splatScale)
 	splat.pos = self.pos
 	splat.sprite.tint = self.splatTint
 end function
@@ -288,6 +289,7 @@ Slime.health = 5
 Slime.loadImageSets "mobs/Slime/Slime"
 Slime.levelColors = ["#AAFFAADD", "#FFFF88DD", "#FF6666DD", "#AAAAFFDD"]
 Slime.instances = []	// (list of all slimes in the level)
+Slime.splatScale = 0.2
 
 Slime.init = function(cell, level=0)
 	super.init cell
@@ -302,8 +304,9 @@ end function
 Slime.setLevel = function(level)
 	qa.assert level >= 0 and level < Slime.levelColors.len
 	self.level = level
-	self.health = 5 + 2^level
+	self.health = 4 + 2^level
 	self.main.sprite.tint = Slime.levelColors[level]
+	self.splatScale = 0.2 + 0.04*level
 end function
 
 Slime.splatTint = function
@@ -332,6 +335,7 @@ end function
 Spider = new Mob
 Spider.health = 15
 Spider.vz = 0
+Spider.splatScale = 0.4
 Spider.init = function(cell)
 	super.init cell
 	self.main = Imposter.make("mobs/spider/Spider", cell, 1)

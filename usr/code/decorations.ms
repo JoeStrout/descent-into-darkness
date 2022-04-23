@@ -156,7 +156,7 @@ end function
 // FlatDecal: a Decoration that lays flat on the floor or ceiling.
 FlatDecal = new Decoration
 FlatDecal.sprite = null  // a Sprite
-FlatDecal.init = function(pos, scale)
+FlatDecal.init = function(pos, scale=1)
 	super.init pos
 	self.sprite = new Sprite
 	self.setScale scale
