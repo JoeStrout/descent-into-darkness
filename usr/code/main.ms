@@ -6,11 +6,12 @@ import "renderer"
 import "levels"
 import "spells"
 import "sounds"
+clear
+import "hud"
 
 Renderer = renderer.Renderer
 camera = renderer.camera
 
-clear
 display(7).mode = displayMode.pixel
 display(7).clear color.clear
 // set up display 2 for debug drawing
@@ -183,16 +184,8 @@ while true
 
 	recentDt[recentDtIdx] = dt
 	recentDtIdx = (recentDtIdx + 1) % 30
-	fps = 1 / (recentDt.mean)
-
-	text.row = 25; text.column = 3
-	camDir = miscUtil.closestDir(camera.angle)
-	text.color = color.silver
-	print "X:" + mathUtil.numToStr(camera.pos[0], 2) + 
-	   "  Y:" + mathUtil.numToStr(camera.pos[1], 2) + 
-	   "  Angle: " + round(camera.angle) + " (" + miscUtil.dirString(camDir) + 
-	   ")     FPS: " + round(fps) + "     "
-	text.color = color.orange
+	hud.fps = 1 / (recentDt.mean)
+	hud.update
 end while
 key.clear
 text.row = 2

@@ -144,10 +144,10 @@ Imposter.render = function(spriteList)
 	
 	self.sprite.image = self.images[idx]
 	super.render spriteList
-	
-	if display(2).mode == displayMode.pixel then
-		display(2).drawPoly self.sprite.worldBounds.corners
-	end if
+//	
+//	if display(2).mode == displayMode.pixel then
+//		display(2).drawPoly self.sprite.worldBounds.corners
+//	end if
 end function
 
 

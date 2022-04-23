@@ -132,7 +132,7 @@ Mob.idleSets = null		// idle frames (each one a set of images from different ang
 Mob.walkSets = null		// walk frames
 Mob.runSets = null		// running frames
 Mob.attackSets = null	// attack frames
-Mob.attackDamage = 5	// hit points of damage we do to player
+Mob.damage = [2,6]		// hit points of damage we do to player
 Mob.aggressive = false	// if true, attacks on site; if false, ignores player
 Mob.curSets = null		// what set of frames we are currently using
 Mob.frameNum = 0		// current frame (image set) we're showing
@@ -149,6 +149,7 @@ Mob.moveSound = null
 Mob.roarSound = null
 Mob.attackSound = null
 Mob.deathSound = sounds.splat
+Mob.xp = 5				// XP granted for killing this mob
 
 Mob.loadImageSets = function(partialPath)
 	self.idleSets = []
@@ -224,14 +225,11 @@ Mob.enterState = function(newState)
 end function
 
 Mob.update = function(dt)
-	animWrapped = false
+	frameChanged = false
 	if time > self.nextFrameTime then
 		self.nextFrameTime = time + 0.3
-		self.frameNum = self.frameNum + 1
-		if self.frameNum >= self.curSets.len then
-			self.frameNum = 0
-			animWrapped = true
-		end if
+		frameChanged = (self.frameNum >= 0)	// (doesn't count when coming from -1)
+		self.frameNum = (self.frameNum + 1) % self.curSets.len
 		self.main.images = self.curSets[self.frameNum]
 	end if
 	
@@ -249,18 +247,33 @@ Mob.update = function(dt)
 			self.enterState kIdle
 		else
 			self.approach self.targetPos, dt
-			if animWrapped and self.moveSound then self.playSound self.moveSound
+			if frameChanged and self.frameNum==0 and self.moveSound then self.playSound self.moveSound
 		end if
 	else if self.state == kChasing then
-		if manhattanDist(self.pos, playerPos) < 1.5 then
+		if manhattanDist(self.pos, playerPos) < 1 then
 			self.enterState kAttacking
 		else
 			self.approach playerPos, dt
-			if animWrapped and self.moveSound then self.playSound self.moveSound
+			if frameChanged and self.frameNum==0 and self.moveSound then self.playSound self.moveSound
 		end if
 	else if self.state == kAttacking then
-		if animWrapped then self.enterState kIdle
+		if frameChanged then
+			if self.frameNum == 1 then self.applyAttack
+			if self.frameNum == 0 then self.enterState kIdle
+		end if
 	end if
+end function
+
+Mob.applyAttack = function
+	if mathUtil.distance(self.pos, camera.pos) > 1 then return	// missed!
+	if self.damage isa number then
+		dam = self.damage
+	else
+		dam = round(mathUtil.randRange(self.damage[0], self.damage[1]))
+	end if
+	if not dam then return
+	
+	player.takeDamage dam
 end function
 
 Mob.pickWanderTarget = function
@@ -332,6 +345,7 @@ Mob.die = function
 	splat.pos = self.pos
 	splat.updateCorners
 	splat.sprite.tint = self.splatTint
+	player.gainXP self.xp
 end function
 
 //---------------------------------------------------------------
@@ -350,7 +364,7 @@ Slime.moveSound = sounds.slimeMove
 Slime.roarSound = sounds.slimeRoar
 Slime.attackSound = sounds.slimeAttack
 
-Slime.init = function(cell, level=0)
+Slime.init = function(cell, level=1)
 	super.init cell
 	self.shadow.setScale 0.2
 	self.main.pos[2] = -0.13	// (sits better on ground)

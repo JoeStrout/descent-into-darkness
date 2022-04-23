@@ -55,6 +55,24 @@ Spell.update = function(dt=0.1)
 	pos = self.billboard.pos
 	oldPos = pos[:]
 	pos.add self.velocity.times(dt)
+	newCol = floor(pos[0])
+	newRow = floor(pos[1])
+
+	// check for hitting an entity
+	cellsToCheck = [self.cell]
+	if lvl.inBounds(newCol, newRow) and (newCol != self.cell.col or newRow != self.cell.row) then 
+		cellsToCheck.push lvl.cells[newCol][newRow]
+	end if
+	// (ToDo: figure out neighboring cells we'd better check)
+	for c in cellsToCheck
+		for e in c.entities
+			if e.hitBySpell(self) then
+				self.die
+				return
+			end if
+		end for
+	end for
+	
 	// if hit floor or ceiling, we're done
 	if pos[2] < 0 or pos[2] > 1 then
 		self.die
@@ -69,24 +87,10 @@ Spell.update = function(dt=0.1)
 	end if
 
 	// make sure still in bounds
-	newCol = floor(pos[0])
-	newRow = floor(pos[1])
 	if not lvl.inBounds(newCol, newRow) then
 		self.die
 		return
 	end if
-	
-	// check for hitting an entity
-	cellsToCheck = [self.cell, lvl.cells[newCol][newRow]]
-	// (ToDo: figure out neighboring cells we'd better check)
-	for c in cellsToCheck
-		for e in c.entities
-			if e.hitBySpell(self) then
-				self.die
-				return
-			end if
-		end for
-	end for
 	
 	// update which cell we're in
 	if newCol != self.cell.col or newRow != self.cell.row then
