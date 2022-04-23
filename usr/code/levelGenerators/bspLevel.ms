@@ -80,13 +80,22 @@ BspLevel.init = function
 		cell = v[0]
 		dir = v[1]
 		w = cell.walls[dir]
-		closed = rnd < 0.8
+		if w isa wall.Doorway then continue
+		closed = rnd < 0.5
 		open = not closed
 		if dir == dirN or dir == dirE then
 			type = wall.Doorway.typeOpenFront * open + wall.Doorway.typeClosedFront * closed
 		else
 			type = wall.Doorway.typeOpenBack * open + wall.Doorway.typeClosedBack * closed
 		end if
+		door = wall.Doorway.make(w.p[0], w.p[1], cell, type)
+		cell.walls[dir] = door
+		// convert the other wall on the other side, too!
+		cell = self.cells[cell.col + dirDx[dir]][cell.row + dirDy[dir]]
+		dir = (dir + 2) % 4
+		w = cell.walls[dir]
+		oldType = type
+		type = wall.Doorway.otherSideType(type)
 		door = wall.Doorway.make(w.p[0], w.p[1], cell, type)
 		cell.walls[dir] = door
 	end for

@@ -2,6 +2,7 @@
 
 import "miscUtil"
 ensureImport "qa"
+ensureImport "renderer"
 
 //---------------------------------------------------------------
 // Make a Wall class to represent any vertical surface that
@@ -24,7 +25,7 @@ Wall.blocksSpell = true
 Wall.init = function(left, right, cell)
 	qa.assert left.len==2 and right.len==2  // left/right should be 2D floor coordinates
 	self.p = [left, right]
-	self.tint = Renderer.tintForSurface(left + [0], right + [0], left + [1])
+	self.tint = renderer.Renderer.tintForSurface(left + [0], right + [0], left + [1])
 	self.sprite = new Sprite
 	if mathUtil.distance(left, right) < 0.25 then
 		if rnd < 0.5 then self.sprite.image = self.imageAshort else self.sprite.image = self.imageBshort
@@ -337,25 +338,28 @@ Doorway.init = function(left, right, cell, type = 0)
 	self.setType type
 end function
 
+Doorway.otherSideType = function(doorType)
+	if doorType == Doorway.typeOpenFront then return Doorway.typeOpenBack
+	if doorType == Doorway.typeClosedFront then return Doorway.typeClosedBack
+	if doorType == Doorway.typeOpenBack then return Doorway.typeOpenFront
+	if doorType == Doorway.typeClosedBack then return Doorway.typeClosedFront
+	return Doorway.typeEmpty
+end function
+	
+Doorway.toggledType = function(doorType)
+	if doorType == Doorway.typeOpenFront then return Doorway.typeClosedFront
+	if doorType == Doorway.typeClosedFront then return Doorway.typeOpenFront
+	if doorType == Doorway.typeOpenBack then return Doorway.typeClosedBack
+	if doorType == Doorway.typeClosedBack then return Doorway.typeOpenBack
+	return Doorway.typeEmpty
+end function
+	
 Doorway.toggleDoor = function(andOtherSide = true)
 	otherDoor = null
 	if andOtherSide then otherDoor = self.otherSide
 	
-	if self.type == Doorway.typeOpenFront then
-		self.setType Doorway.typeClosedFront
-		if otherDoor then otherDoor.setType Doorway.typeClosedBack
-	else if self.type == Doorway.typeOpenBack then
-		self.setType Doorway.typeClosedBack
-		if otherDoor then otherDoor.setType Doorway.typeClosedFront
-	else if self.type == Doorway.typeClosedFront then
-		self.setType Doorway.typeOpenFront
-		if otherDoor then otherDoor.setType Doorway.typeOpenBack
-	else if self.type == Doorway.typeClosedBack then
-		self.setType Doorway.typeOpenBack
-		if otherDoor then otherDoor.setType Doorway.typeOpenFront
-	else
-		return
-	end if
+	self.setType Doorway.toggledType(self.type)
+	if otherDoor then otherDoor.setType Doorway.otherSideType(self.type)
 end function
 
 Doorway.render = function(spriteList)
@@ -372,6 +376,23 @@ Doorway.make = function(left, right, cell, type = 4)
 end function
 
 Doorway.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
+	super.drawInMap left, bottom, scaleX, scaleY
+	rp0 = self.p[0].rounded
+	rp1 = self.p[1].rounded
+	a = mathUtil.lerp2d(rp0, rp1, 0.3)
+	b = mathUtil.lerp2d(rp0, rp1, 0.7)
+	perp = [b[1] - a[1], a[0] - b[0]]
+	normalize perp
+	perp.multiplyBy 2
+	if self.isClosed then c = "#FF0000" else c = "#00FF00"
+	gfx.line left + a[0]*scaleX+perp[0], bottom + a[1]*scaleY+perp[1],
+	   left + b[0]*scaleX+perp[0], bottom + b[1]*scaleY+perp[1], c, 2
+	gfx.line left + a[0]*scaleX+perp[0], bottom + a[1]*scaleY+perp[1],
+	   left + a[0]*scaleX-perp[0], bottom + a[1]*scaleY-perp[1], c, 2
+	gfx.line left + b[0]*scaleX-perp[0], bottom + b[1]*scaleY-perp[1],
+	   left + b[0]*scaleX+perp[0], bottom + b[1]*scaleY+perp[1], c, 2
+	return
+
 	super.drawInMap left, bottom, scaleX, scaleY
 	rp0 = self.p[0].rounded
 	rp1 = self.p[1].rounded
