@@ -263,7 +263,12 @@ Pit.make = function(cell, scale=0.5)
 end function
 
 Pit.render = function(spriteList)
-	invD = 1 / camera.distance(self.pos)
+	dist = camera.distance(self.pos)
+	if dist < 0.35 then
+		enterNextLevel
+		return
+	end if
+	invD = 1 / dist
 	if invD < 0 then return
 	if not self.calcScreenPos then return
 	

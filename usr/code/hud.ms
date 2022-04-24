@@ -62,6 +62,41 @@ showDeath = function
 	wait 2
 end function
 
+printCentralMessage = function(msg="")
+	textDisp.row = 12
+	textDisp.column = 0
+	textDisp.color = color.silver
+	textDisp.print " "*(34-msg.len/2) + msg + " "*(34-msg.len/2)
+	return
+end function
+
+fadeOut = function(msg="")
+	update
+	
+	printCentralMessage msg
+
+	display(3).mode = displayMode.solidColor
+	for alpha in range(0, 255, 2)
+		display(3).color = "#000000" + hex2(alpha)
+		yield
+	end for
+end function
+
+fadeIn = function(msg="")
+	update
+	
+	printCentralMessage msg
+	
+	display(3).mode = displayMode.solidColor
+	for alpha in range(255, 0, -2)
+		display(3).color = "#000000" + hex2(alpha)
+		yield
+	end for
+	display(3).mode = displayMode.text
+
+	printCentralMessage ""
+end function
+
 update = function
 	display(1).mode = displayMode.text
 	textDisp.row = 25; textDisp.column = 3
@@ -69,7 +104,7 @@ update = function
 	textDisp.color = color.silver
 	textDisp.print "Health: "
 	if player.health > 70 then
-		textDisp.color = color.green
+		textDisp.color = color.lime
 	else if player.health > 30 then
 		textDisp.color = color.yellow
 	else
@@ -78,6 +113,7 @@ update = function
 	textDisp.print str(player.health).pad(6)
 	textDisp.color = color.silver
 	textDisp.print "XP: " + str(player.xp).pad(6)
+	textDisp.print "Depth: " + str(currentLevelNum).pad(6)
 	camDir = miscUtil.closestDir(camera.angle)
 	textDisp.print miscUtil.dirString(camDir).pad(8)
 	

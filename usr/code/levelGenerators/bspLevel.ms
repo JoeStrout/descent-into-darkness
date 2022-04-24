@@ -45,7 +45,9 @@ BspLevel.init = function
 	self.fixTinyPassages
 	
 	// Dig the pit to the next level.
-	decorations.Pit.make self.possiblePits.any
+	for i in range(50)
+		decorations.Pit.make self.possiblePits.any
+	end for
 	
 	// Finally, build walls based on the rock attribute and IDs.
 	joined = {}  // key: [roomA,roomB]; value: [cell,dir] that should be converted to Doorway

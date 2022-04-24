@@ -84,6 +84,15 @@ Entity.die = function
 	self.main.die
 end function
 
+// Call this method to destroy an entity quickly and silently,
+// e.g. when switching levels.
+Entity.destroy = function
+	super.die
+	self.cell.entities.removeVal self
+	self.shadow.die
+	self.main.die
+end function
+
 // Determine whether the given spell hits this entity.
 // If so, return true and apply damage to self.
 // Otherwise, return false.
@@ -372,6 +381,11 @@ Slime.init = function(cell, level=0)
 	Slime.instances.push self
 end function
 
+Slime.destroy = function
+	super.destroy
+	Slime.instances.removeVal self
+end function
+
 Slime.setLevel = function(level)
 	qa.assert level >= 0 and level < Slime.levelColors.len
 	self.level = level
@@ -425,4 +439,17 @@ Spider.update = function(dt)
 	self.main.pos[2] = y
 	self.shadow.setScale 0.4 - y*0.2
 	self.shadow.sprite.tint = color.lerp(color.black, color.clear, y)
+end function
+
+
+//---------------------------------------------------------------
+// entities (module) methods
+clearAll = function
+	for i in Slime.instances.reverseIndexes
+		Slime.instances[i].destroy
+	end for
+	for i in updatable.all.reverseIndexes
+		item = updatable.all[i]
+		if item isa Entity then item.destroy
+	end for	
 end function

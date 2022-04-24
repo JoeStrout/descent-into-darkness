@@ -6,14 +6,14 @@
 _levelClassByDepth = []
 
 _levelClassByDepth.push "TestLevel"		// Town
-_levelClassByDepth.push "CaveLevel"		// Dungeon level 1
-_levelClassByDepth.push "MazeLevel"		// Dungeon level 2
+//_levelClassByDepth.push "CaveLevel"		// Dungeon level 1
+//_levelClassByDepth.push "MazeLevel"		// Dungeon level 2
 _levelClassByDepth.push "BspLevel"		// Dungeon level 3
 
 // ToDo: explicitly (or pseudo-randomly) assign a level type 
 // to each of the 32 dungeon levels.  For now, they're all just this:
 while _levelClassByDepth.len < 33
-	_levelClassByDepth.push "TestLevel"
+	_levelClassByDepth.push "BspLevel"
 end while
 _levelClassByDepth.push "TestLevel"		// test level
 

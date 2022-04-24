@@ -85,6 +85,11 @@ surfaceNormal = function(ptA, ptB, ptC)
 	return normal
 end function
 
+list.reverseIndexes = function
+	if self.len < 1 then return []
+	return range(self.len - 1)
+end function
+
 // subtract: subtract a number from all elements of a list (in place),
 // OR do element-wise subtraction with another list of the same size.
 list.subtract = function(other)

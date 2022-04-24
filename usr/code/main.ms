@@ -9,6 +9,8 @@ import "sounds"
 clear
 import "hud"
 
+currentLevelNum = 0
+
 Renderer = renderer.Renderer
 camera = renderer.camera
 
@@ -19,7 +21,8 @@ display(2).mode = displayMode.pixel
 display(2).color = color.fuchsia
 display(2).clear color.clear
 
-lvl = levels.get(-1)			// <=== defines the starting level
+
+lvl = levels.get(0)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 
@@ -28,6 +31,17 @@ gfx.clear color.gray, 960, 960
 gfx.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
 gfx.scrollY = 160
 
+
+enterNextLevel = function
+	globals.currentLevelNum = currentLevelNum + 1
+	msg = "Descending to level " + currentLevelNum + "..."
+	hud.fadeOut msg
+	entities.clearAll
+	globals.lvl = levels.get(currentLevelNum)
+	Renderer.cell = lvl.cells
+	camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
+	hud.fadeIn msg
+end function
 
 // Limit the camera movement so that it does not pass through
 // walls (or other obstacles).  We're given the old position
