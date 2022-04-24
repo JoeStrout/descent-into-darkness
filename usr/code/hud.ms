@@ -113,6 +113,9 @@ update = function
 	textDisp.print str(player.health).pad(6)
 	textDisp.color = color.silver
 	textDisp.print "XP: " + str(player.xp).pad(6)
+	textDisp.print "Coins: "
+	textDisp.color = "#FFFF88"; textDisp.print str(player.gold).pad(6)
+	textDisp.color = color.silver
 	textDisp.print "Depth: " + str(currentLevelNum).pad(6)
 	camDir = miscUtil.closestDir(camera.angle)
 	textDisp.print miscUtil.dirString(camDir).pad(8)

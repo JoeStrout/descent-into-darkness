@@ -263,12 +263,11 @@ Pit.make = function(cell, scale=0.5)
 end function
 
 Pit.render = function(spriteList)
-	dist = camera.distance(self.pos)
-	if dist < 0.35 then
+	if mathUtil.distance(camera.pos, self.pos) < 0.35 then
 		enterNextLevel
 		return
 	end if
-	invD = 1 / dist
+	invD = 1 / camera.distance(self.pos)
 	if invD < 0 then return
 	if not self.calcScreenPos then return
 	
@@ -345,7 +344,7 @@ Mesh.quadTexture = file.loadImage("/usr/content/textures/TestTexture.png")
 
 Mesh.make = function(cell, alreadyMadeInstance=null)
 	if alreadyMadeInstance then mesh = alreadyMadeInstance else mesh = new Mesh
-	mesh.init [cell.col, cell.row, 0]
+	mesh.init [cell.col + 0.5, cell.row + 0.5, 0]
 	cell.decorations.push mesh
 	return mesh
 end function
@@ -356,8 +355,10 @@ end function
 Mesh.init = function(pos)
 	self.pos = pos
 	if self.vertices then
-		newVerts = self.vertices[:]
-		for v in newVerts; v.add pos; end for
+		newVerts = []
+		for v in self.vertices
+			newVerts.push v.plus(pos)
+		end for
 		self.vertices = newVerts
 	end if
 	self.screenVerts = []
@@ -428,11 +429,11 @@ end function
 // A few simple shapes mostly to test the Mesh class.
 Pyramid = new Mesh
 Pyramid.vertices = [
-[0.1, 0.1, 0],
-[0.9, 0.1, 0],
-[0.9, 0.9, 0],
-[0.1, 0.9, 0],
-[0.5, 0.5, 0.6]]
+	[0.1, 0.1, 0],
+	[0.9, 0.1, 0],
+	[0.9, 0.9, 0],
+	[0.1, 0.9, 0],
+	[0.5, 0.5, 0.6]]
 Pyramid.quads = [ [0,1,4,4], [1,2,4,4], [2,3,4,4], [3,0,4,4] ]
 Pyramid.make = function(cell, imageName)
 	result = super.make(cell, new Pyramid)
@@ -442,32 +443,44 @@ end function
 
 Box = new Mesh
 Box.vertices = [
-[0.4, 0.36, 0],
-[0.6, 0.36, 0],
-[0.6, 0.64, 0],
-[0.4, 0.65, 0],
-[0.4, 0.36, 0.3],
-[0.6, 0.36, 0.3],
-[0.6, 0.64, 0.3],
-[0.4, 0.64, 0.3]]
+	[-0.1, -0.14, 0],
+	[0.1, -0.14, 0],
+	[0.1, 0.14, 0],
+	[-0.1, 0.14, 0],
+	[-0.1, -0.14, 0.3],
+	[0.1, -0.14, 0.3],
+	[0.1, 0.14, 0.3],
+	[-0.1, 0.14, 0.3]]
 Box.quads = [ [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7], [4,5,6,7] ]
-Box.make = function(cell, imageName)
-	result = super.make(cell, new Box)
+Box.make = function(cell, imageName="", alreadyMadeInstance=null)
+	if alreadyMadeInstance == null then alreadyMadeInstance = new Box
+	result = super.make(cell, alreadyMadeInstance)
 	if imageName then result.quadTexture = file.loadImage("/usr/content/textures/" + imageName)
 	return result
 end function
 
 Chest = new Box
+Chest.value = 50
 Chest.make = function(cell)
-	result = super.make(cell, new Chest)
+	result = super.make(cell, "", new Chest)
 	sideimg = file.loadImage("/usr/content/textures/ChestSide.png")
 	backimg = file.loadImage("/usr/content/textures/ChestBack.png")
 	frontimg = file.loadImage("/usr/content/textures/ChestFront.png")
 	topimg = file.loadImage("/usr/content/textures/ChestTop.png")
 	result.quadTexture = [sideimg, frontimg, sideimg, backimg, topimg]
+	result.value = round(mathUtil.randRange(40,80))
 	return result
 end function
-
+Chest.render = function(spriteList)
+	dist = mathUtil.distance(camera.pos, self.pos)
+	if dist < 0.25 then
+		// collect this chest!
+		player.gainGold self.value
+		self.die
+		return
+	end if
+	super.render spriteList
+end function
 
 // We use these classes a lot, so let's just make them global:
 globals.Billboard = Billboard

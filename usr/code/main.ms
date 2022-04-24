@@ -9,7 +9,7 @@ import "sounds"
 clear
 import "hud"
 
-currentLevelNum = 0
+currentLevelNum = 1
 
 Renderer = renderer.Renderer
 camera = renderer.camera
@@ -22,7 +22,7 @@ display(2).color = color.fuchsia
 display(2).clear color.clear
 
 
-lvl = levels.get(0)
+lvl = levels.get(currentLevelNum)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 

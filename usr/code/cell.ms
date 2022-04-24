@@ -289,7 +289,9 @@ Cell.debugDraw = function(left, bottom, scaleX=20, scaleY=20)
 end function
 
 Cell.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
-	if self.minDistSeen > 10 or (self.hasIndex("rock") and self.rock) then return
+	if not self.decorations then
+		if self.minDistSeen > 10 or (self.hasIndex("rock") and self.rock) then return
+	end if
 	if self.minDistSeen < 4 then
 		c = "#88888888"
 	else

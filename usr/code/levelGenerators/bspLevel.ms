@@ -44,9 +44,15 @@ BspLevel.init = function
 	// Fix any tiny (size=1) rooms.
 	self.fixTinyPassages
 	
-	// Dig the pit to the next level.
-	for i in range(50)
-		decorations.Pit.make self.possiblePits.any
+	// Dig a few pits to the next level...
+	self.possiblePits.shuffle
+	for i in range(2)
+		decorations.Pit.make self.possiblePits.pop
+	end for
+	
+	// And also scatter some treasure chests about.
+	for i in range(11)
+		decorations.Chest.make self.possiblePits.pop
 	end for
 	
 	// Finally, build walls based on the rock attribute and IDs.

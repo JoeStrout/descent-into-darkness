@@ -15,6 +15,11 @@ player.gainXP = function(dXP)
 	self.xp = self.xp + dXP
 end function
 
+player.gainGold = function(dGold)
+	self.gold = self.gold + dGold
+	if dGold then sounds.coinsMany.play
+end function
+
 player.takeDamage = function(damage)
 	self.health = self.health - damage
 	if self.health < 0 then self.health = 0
