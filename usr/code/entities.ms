@@ -364,7 +364,7 @@ Slime.moveSound = sounds.slimeMove
 Slime.roarSound = sounds.slimeRoar
 Slime.attackSound = sounds.slimeAttack
 
-Slime.init = function(cell, level=1)
+Slime.init = function(cell, level=0)
 	super.init cell
 	self.shadow.setScale 0.2
 	self.main.pos[2] = -0.13	// (sits better on ground)

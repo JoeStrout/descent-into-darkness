@@ -14,6 +14,7 @@ globals.Wall = {}
 Wall.p = null // 2D floor points, in world coordinates: [left, right]
 Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
+Wall.alts = [file.loadImage("/usr/content/textures/SewerWallAlt.png")]
 //Wall.imageA = file.loadImage("/usr/content/textures/TestTexture.png")
 //Wall.imageB = Wall.imageA
 Wall.imageAshort = Wall.imageA.getImage(0, 0, Wall.imageA.width/10, Wall.imageA.height)
@@ -31,6 +32,7 @@ Wall.init = function(left, right, cell)
 		if rnd < 0.5 then self.sprite.image = self.imageAshort else self.sprite.image = self.imageBshort
 	else
 		if rnd < 0.5 then self.sprite.image = self.imageA else self.sprite.image = self.imageB
+		if rnd < 0.1 then self.sprite.image = self.alts.any
 	end if
 end function
 Wall.make = function(left, right, cell)
