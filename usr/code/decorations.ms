@@ -437,18 +437,29 @@ end function
 
 Box = new Mesh
 Box.vertices = [
-[0.2, 0.3, 0],
-[0.8, 0.3, 0],
-[0.8, 0.7, 0],
-[0.2, 0.7, 0],
-[0.2, 0.3, 0.35],
-[0.8, 0.3, 0.35],
-[0.8, 0.7, 0.35],
-[0.2, 0.7, 0.35]]
+[0.4, 0.36, 0],
+[0.6, 0.36, 0],
+[0.6, 0.64, 0],
+[0.4, 0.65, 0],
+[0.4, 0.36, 0.3],
+[0.6, 0.36, 0.3],
+[0.6, 0.64, 0.3],
+[0.4, 0.64, 0.3]]
 Box.quads = [ [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7], [4,5,6,7] ]
 Box.make = function(cell, imageName)
 	result = super.make(cell, new Box)
 	if imageName then result.quadTexture = file.loadImage("/usr/content/textures/" + imageName)
+	return result
+end function
+
+Chest = new Box
+Chest.make = function(cell)
+	result = super.make(cell, new Chest)
+	sideimg = file.loadImage("/usr/content/textures/ChestSide.png")
+	backimg = file.loadImage("/usr/content/textures/ChestBack.png")
+	frontimg = file.loadImage("/usr/content/textures/ChestFront.png")
+	topimg = file.loadImage("/usr/content/textures/ChestTop.png")
+	result.quadTexture = [sideimg, frontimg, sideimg, backimg, topimg]
 	return result
 end function
 
