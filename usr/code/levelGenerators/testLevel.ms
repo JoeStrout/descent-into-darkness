@@ -58,17 +58,17 @@ TestLevel.init = function
 	
 	//TestDec.make self.cells[3][3]
 	cobble = FlatDecal.make("brickFloorDecal.png", self.cells[3][3])
-	cobble.sprite.tint = color.gray
+	cobble.sprite.tint = "#FFFFFF88"
 	
 	globals.pit = decorations.Pit.make(self.cells[13][2])
 	
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
-
+	
 	globals.mob = new entities.Slime
 	mob.init self.cells[8][3]
 	mob.rotateTo 180
-
+	
 	decorations.Chest.make self.cells[3][4]
 	
 	Cell.fixCorners self.cells

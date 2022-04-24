@@ -89,7 +89,7 @@ showMap = function
 	display(3).clear "#00000044"
 	display(3).drawImage images.parchment, 480-images.parchment.width/2, 320-images.parchment.height/2
 	display(2).mode = displayMode.pixel
-
+	
 	// level
 	mapMidX = 480-15
 	mapMidY = 320-6
@@ -110,7 +110,7 @@ showMap = function
 	playerInd.y = mapBottom + camera.pos[1] * mapSize/lvl.rows
 	playerInd.rotation = camera.angle
 	display(1).sprites.push playerInd
-		
+	
 	while key.pressed("m"); yield; end while; key.clear
 	
 	gfx.print "Press any key", 650, 105, "#555522AA", "small"
@@ -138,17 +138,17 @@ handleInputs = function
 	else if key.pressed("e") then
 		camera.turn -4
 	end if
-
+	
 	mouseX = key.axis("Mouse X")
 	if mouseX != 0 then camera.turn -2 * mouseX
-
+	
 	mouseY = key.axis("Mouse Y")
 	if mouseY != 0 then
 		gfx.scrollY = mathUtil.clamp(gfx.scrollY + mouseY * 25, 0, 320)
 		display(4).scrollY = gfx.scrollY - 160
 		display(2).scrollY = display(4).scrollY
 	end if
-
+	
 	if vInput or hInput then limitCameraMovement prevPos
 	
 	actionDown = key.pressed("left shift") or key.pressed("right shift") or key.pressed("tab")
@@ -176,12 +176,12 @@ while true
 	else 
 		handleInputs
 	end if
-
+	
 	dt = time - lastTimestamp
 	lastTimestamp = time
 	updatable.update min(dt, 0.1)
 	renderer.rerender		// (includes `yield`)
-
+	
 	recentDt[recentDtIdx] = dt
 	recentDtIdx = (recentDtIdx + 1) % 30
 	hud.fps = 1 / (recentDt.mean)
