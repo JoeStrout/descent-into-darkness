@@ -65,7 +65,7 @@ TestLevel.init = function
 	FlatDecal.make "shadow.png", self.cells[4][4], 0.25
 	Billboard.make "NPCs/guard.png", self.cells[4][4]
 	
-	globals.mob = new entities.Slime
+	globals.mob = new entities.Spider //Slime
 	mob.init self.cells[8][3]
 	mob.rotateTo 180
 	

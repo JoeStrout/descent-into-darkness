@@ -347,6 +347,14 @@ Mob.render = function(spriteList)
 	super.render spriteList
 end function
 
+Mob.hitBySpell = function(spell)
+	if super.hitBySpell(spell) then
+		self.aggressive = true
+		return true
+	end if
+	return false
+end function
+	
 Mob.die = function
 	super.die
 	if self.deathSound then self.playSound self.deathSound
@@ -419,17 +427,23 @@ end function
 // Spider
 // It jumps.  It hisses.  It bites.
 Spider = new Mob
+Spider.loadImageSets "mobs/spider/Spider"
 Spider.health = 15
 Spider.vz = 0
 Spider.splatScale = 0.4
+Spider.moveSound = sounds.spiderMove
+Spider.roarSound = sounds.spiderRoar
+Spider.attackSound = sounds.spiderAttack
+
 Spider.init = function(cell)
 	super.init cell
-	self.main = Imposter.make("mobs/spider/Spider", cell, 1)
-	self.decorations = [self.shadow, self.main]
 	self.main.pos[2] = -0.15	// (sits better on ground)
 	self.main.sprite.localBounds.y = 20
 end function
 Spider.update = function(dt)
+	super.update dt
+	return
+	
 	self.vz = self.vz - 5 * dt
 	y = self.main.pos[2] + self.vz * dt
 	if y < -0.15 then
