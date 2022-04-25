@@ -57,6 +57,9 @@ camera.setAngle = function(degrees)
 	self.angleRad = self.angle * degToRad
 	self.cosAng = cos(self.angleRad)
 	self.sinAng = sin(self.angleRad)
+	if gfx.width > 960 then
+		gfx.scrollX = (3840 - 960/45 * self.angle) % gfx.width
+	end if
 end function	
 camera.turn = function(degreesCCW)
 	self.setAngle self.angle + degreesCCW

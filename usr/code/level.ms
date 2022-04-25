@@ -25,6 +25,16 @@ Level.init = function
 	self.startPos = [2,2]
 end function
 
+Level.drawBackground = function(displayNum = 5)
+	// draw the floor and ceiling
+	display(displayNum).mode = displayMode.pixel
+	g = display(displayNum)
+	g.clear color.gray, 960, 960
+	g.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
+	g.scrollY = 160
+end function
+
+
 // Clear the level entirely.  add a big empty space.
 Level.clear = function(cols=32, rows=32)
 	self.cols = cols
@@ -150,6 +160,23 @@ Level.addOutwardBox = function(left, bottom, width, height)
 	self.addLongWall [right,top], [left,top]
 	self.addLongWall [right,bottom], [right,top]
 	self.addLongWall [left,bottom-1], [right,bottom-1]
+end function
+
+Level.addDoubleWallBox = function(left, bottom, width, height)
+	top = bottom + height
+	right = left + width
+	self.addDoubleSidedWall [left,top], [left,bottom]
+	self.addDoubleSidedWall [right,top], [left,top]
+	self.addDoubleSidedWall [right,bottom], [right,top]
+	self.addDoubleSidedWall [left,bottom], [right,bottom]
+end function
+
+Level.cutDoor = function(col, row, direction, actualDoor=true)
+	d = self.cells[col][row].addWall(direction, wall.Doorway)
+	d.setType wall.Doorway.typeClosedFront * actualDoor
+	d = self.cells[col + dirDx[direction]][row + dirDy[direction]].
+		addWall((direction+2)%4, wall.Doorway)
+	d.setType wall.Doorway.typeClosedBack * actualDoor	
 end function
 
 // Add an inward-facing wall around the edge of the map.

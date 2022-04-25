@@ -56,6 +56,7 @@ Cell.addWall = function(dir, wallClass=null)
 	end if
 
 	self.walls[dir] = w
+	return w
 end function
 
 // Method to call on a 2d array of cells, to go through and fix up all

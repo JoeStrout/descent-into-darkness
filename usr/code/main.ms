@@ -9,7 +9,7 @@ import "sounds"
 clear
 import "hud"
 
-currentLevelNum = 1
+currentLevelNum = 0
 
 Renderer = renderer.Renderer
 camera = renderer.camera
@@ -25,12 +25,7 @@ display(2).clear color.clear
 lvl = levels.get(currentLevelNum)
 Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
-
-// draw the floor and ceiling
-gfx.clear color.gray, 960, 960
-gfx.drawImage file.loadImage("/usr/content/backgrounds/floorCeiling.jpg")
-gfx.scrollY = 160
-
+lvl.drawBackground
 
 enterNextLevel = function
 	globals.currentLevelNum = currentLevelNum + 1
@@ -40,6 +35,7 @@ enterNextLevel = function
 	globals.lvl = levels.get(currentLevelNum)
 	Renderer.cell = lvl.cells
 	camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
+	lvl.drawBackground
 	hud.fadeIn msg
 end function
 
