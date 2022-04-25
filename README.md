@@ -20,7 +20,7 @@ This is a community project to develop a Doom-like fantasy RPG dungeon crawler u
 - **Spacebar** or **Return**: fire a spell.
 - **M**: show in-game map.
 
-Note that mobs can't hurt you yet.  But you can destroy them with spells (spiders require multiple hits; slimes need only one).
+Spiders and green slimes are non-aggressive until provoked.  Other slimes, however, will attack on sight.
 
 ## Exploring the project
 
