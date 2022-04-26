@@ -129,6 +129,7 @@ Imposter.make = function(partialPath, cell, height=1.6)
 end function
 
 Imposter.render = function(spriteList)
+	globals.wtf = self
 	// get the angle of the object as seen from the camera
 	angToCam = atan(camera.pos[1] - self.pos[1], camera.pos[0] - self.pos[0]) * radToDeg
 	ang = self.rotation - angToCam

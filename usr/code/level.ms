@@ -93,11 +93,11 @@ Level.addLongWall = function(leftmost, rightmost)
 		// vertical wall at x
 		if leftmost[1] < rightmost[1] then
 			for y in range(leftmost[1], rightmost[1]-1)
-				self.cells[x][y].addWall dirW
+				if self.inBounds(x,y) then self.cells[x][y].addWall dirW
 			end for
 		else
 			for y in range(rightmost[1], leftmost[1]-1)
-				self.cells[x][y].addWall dirE
+				if self.inBounds(x,y) then self.cells[x][y].addWall dirE
 			end for
 		end if
 	else if leftmost[1] == rightmost[1] then
@@ -105,11 +105,11 @@ Level.addLongWall = function(leftmost, rightmost)
 		// horizontal wall at y
 		if leftmost[0] < rightmost[0] then
 			for x in range(leftmost[0], rightmost[0]-1)
-				self.cells[x][y].addWall dirN
+				if self.inBounds(x,y) then self.cells[x][y].addWall dirN
 			end for
 		else
 			for x in range(rightmost[0], leftmost[0]-1)
-				self.cells[x][y].addWall dirS
+				if self.inBounds(x,y) then self.cells[x][y].addWall dirS
 			end for
 		end if
 	else
