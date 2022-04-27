@@ -32,7 +32,7 @@ Wall.init = function(left, right, cell)
 		if rnd < 0.5 then self.sprite.image = self.imageAshort else self.sprite.image = self.imageBshort
 	else
 		if rnd < 0.5 then self.sprite.image = self.imageA else self.sprite.image = self.imageB
-		if rnd < 0.1 then self.sprite.image = self.alts.any
+		if self.alts and rnd < 0.1 then self.sprite.image = self.alts.any
 	end if
 end function
 Wall.make = function(left, right, cell)
