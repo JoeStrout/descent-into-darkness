@@ -375,9 +375,12 @@ Mesh.render = function(spriteList)
 		angle = camera.relativeAngle(v)
 		x = 480 - tan(angle)*1158
 		invD = 1 / camera.distance(v)
-		if invD < 0 then return	// ToDo: deal with this
-		y = 320 + (-300 + 600 * v[2]) * invD
-		self.screenVerts[i] = [x,y]
+		if invD < 0 then 
+			self.screenVerts[i] = null
+		else
+			y = 320 + (-300 + 600 * v[2]) * invD
+			self.screenVerts[i] = [x,y]
+		end if
 	end for
 	
 	// Then submit a properly stretched sprite for each quad that is facing the camera
@@ -392,7 +395,7 @@ Mesh.render = function(spriteList)
 			end if
 			self.sprites.push spr
 			normal = miscUtil.surfaceNormal(self.vertices[q[0]], self.vertices[q[1]],
-			self.vertices[q[2]])
+			   self.vertices[q[2]])
 			self.quadNormals.push normal
 			spr.nearbyTint = Renderer.tintForNormal(normal)
 		end for
@@ -404,9 +407,12 @@ Mesh.render = function(spriteList)
 		cosAng = viewVec.dot(self.quadNormals[i])
 		if cosAng < 0 then continue
 		corners = [null,null,null,null]
+		bogus = false
 		for j in [0,1,2,3]
 			corners[j] = self.screenVerts[quad[j]]
+			if corners[j] == null then bogus = true  // ToDo: fix this via extrapolation
 		end for
+		if bogus then continue
 		spr = self.sprites[i]
 		spr.setCorners corners
 		spr.tint = Renderer.darkenForDistance(spr.nearbyTint, invD)

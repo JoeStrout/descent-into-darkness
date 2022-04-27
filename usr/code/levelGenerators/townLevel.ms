@@ -43,12 +43,27 @@ end function
 
 TownLevel.init = function
 	super.init
-	self.addOuterWall
+	
+	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
+	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
+	Wall.alts = []
 
+	self.addOuterWall
 	self.addOutwardBox 0, 0, 1, 1
 	self.addOutwardBox 31, 0, 1, 1
 	self.addOutwardBox 31, 31, 1, 1
 	self.addOutwardBox 0, 31, 1, 1
+
+	self.addGuard 0, 1
+	self.addGuard 30, 0
+	self.addGuard 31,30
+	self.addGuard 1, 31
+
+	Wall.imageA = file.loadImage("/usr/content/textures/TownHouseWallA.png")
+	Wall.imageB = file.loadImage("/usr/content/textures/TownHouseWallB.png")
+	Wall.alts = [file.loadImage("/usr/content/textures/TownHouseWallAlt.png")]
+	wall.Doorway.prepImages
+	
 
 	self.addRectBldg 15, 0, 3, 3, dirW
 	self.addRectBldg 17, 3, 3, 4, [dirW, dirN]
