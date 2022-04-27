@@ -411,6 +411,11 @@ Mesh.render = function(spriteList)
 		for j in [0,1,2,3]
 			corners[j] = self.screenVerts[quad[j]]
 			if corners[j] == null then bogus = true  // ToDo: fix this via extrapolation
+			// If we have a quad with some bogus (behind-the-camera-plane)
+			// points and some comfortably on screen, then we need to 
+			// use extrapolation to find where the bogus corners should
+			// be positioned so that the quad is correct on the edge
+			// of the screen.  This is very similar to what walls do.			
 		end for
 		if bogus then continue
 		spr = self.sprites[i]
