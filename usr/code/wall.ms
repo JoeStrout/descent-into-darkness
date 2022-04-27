@@ -224,8 +224,18 @@ Doorway.createMesh = function(meshType, doorOnly=false)
 	right = self.p[1] + [0]
 	leftTop = left.plus([0,0,1])
 	rightTop = right.plus([0,0,1])
-	leftRound = left.rounded
-	rightRound = right.rounded
+	// We base our door position on the *full* extent of the wall,
+	// ignoring minor adjustments at the end for corner joins.  To
+	// do that, we round whichever dimension has the greatest span.
+	leftRound = left[:]; rightRound = right[:]
+	if abs(left[0]-right[0]) > abs(left[1] - right[1]) then
+		leftRound[0] = round(left[0])
+		rightRound[0] = round(right[0])
+	else
+		leftRound[1] = round(left[1])
+		rightRound[1] = round(right[1])
+	end if
+		
 	doorLeft = mathUtil.lerp2d(leftRound, rightRound, 0.35) + [0]
 	doorRight = mathUtil.lerp2d(leftRound, rightRound, 0.65) + [0]
 	doorLeftJamb = doorLeft.plus([0,0,0.8])
