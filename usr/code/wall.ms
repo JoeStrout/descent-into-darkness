@@ -171,6 +171,8 @@ Doorway.typeClosedFront = 2
 Doorway.typeOpenBack = 3
 Doorway.typeOpenFront = 4
 
+Doorway.blocksSpell = function; return self.isClosed; end function
+
 Doorway.prepImages = function
 	// get images for the wall surrounding the doorway
 	wallImg = self.imageA
