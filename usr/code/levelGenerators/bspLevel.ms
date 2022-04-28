@@ -18,6 +18,11 @@ BspLevel = new level.Level
 
 BspLevel.init = function
 	super.init
+
+	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
+	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
+	Wall.alts = [file.loadImage("/usr/content/textures/SewerWallAlt.png")]
+	wall.Doorway.prepImages
 	
 	// We'll use a boolean "rock" attribute on every cell to keep
 	// track of which cells are solid rock, and which are walkable.

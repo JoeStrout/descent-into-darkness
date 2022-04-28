@@ -8,6 +8,12 @@ import "mazeGenerator"
 MazeLevel = new level.Level
 
 MazeLevel.init = function
+
+	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
+	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
+	Wall.alts = [file.loadImage("/usr/content/textures/SewerWallAlt.png")]
+	wall.Doorway.prepImages
+
 	// make sure we have an odd number of rows/columns
 	self.clear 19, 19
 	self.startPos = [2,2]
