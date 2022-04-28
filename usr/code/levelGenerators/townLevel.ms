@@ -6,6 +6,45 @@ ensureImport "level"
 ensureImport "entities"
 import "townSky"
 
+Roof = new decorations.Mesh
+Roof.verts = [null] * 4	// index by direction, then by corner type (none, left, right, both)
+
+Roof.verts[dirW] = [	// roofs to the WEST (east side of bldg)
+  [[0.1, 0, 1], [0.1, 1, 1], [-0.1, 1, 1.5], [-0.1, 0, 1.5], [0, 0, 1], [0, 1, 1]],	// no corners
+  [[0.1, -0.1, 1], [0.1, 1, 1], [-0.1, 1, 1.5], [-0.1, 0.1, 1.5], [0, 0, 1], [0, 1, 1]], // corner on left
+  [[0.1, 0, 1], [0.1, 1.1, 1], [-0.1, 0.9, 1.5], [-0.1, 0, 1.5], [0, 0, 1], [0, 1, 1]], // corner on right
+  [[0.1, -0.1, 1], [0.1, 1.1, 1], [-0.1, 0.9, 1.5], [-0.1, 0.1, 1.5], [0, 0, 1], [0, 1, 1]] ] // both corners
+
+Roof.verts[dirE] = [	// roofs to the EAST (west side of bldg)
+  [[0.9, 1, 1], [0.9, 0, 1], [1.1, 0, 1.5], [1.1, 1, 1.5], [1, 1, 1], [1, 0, 1]],	// no corners
+  [[0.9, 1.1, 1], [0.9, 0, 1], [1.1, 0, 1.5], [1.1, 0.9, 1.5], [1, 1, 1], [1, 0, 1]], // corner on left
+  [[0.9, 1.1, 1], [0.9, -0.1, 1], [1.1, 0.1, 1.5], [1.1, 1, 1.5], [1, 1, 1], [1, 0, 1]], // corner on right
+  [[0.9, 1.1, 1], [0.9, -0.1, 1], [1.1, 0.1, 1.5], [1.1, 0.9, 1.5], [1, 1, 1], [1, 0, 1]] ] // both corners
+
+Roof.verts[dirS] = [	// roofs to the SOUTH (north side of bldg)
+  [[1, 0.1, 1], [0, 0.1, 1], [0, -0.1, 1.5], [1, -0.1, 1.5], [1, 0, 1], [0, 0, 1]],	// no corners
+  [[1.1, 0.1, 1], [0, 0.1, 1], [0, -0.1, 1.5], [0.9, -0.1, 1.5], [1, 0, 1], [0, 0, 1]], // corner on left
+  [[1, 0.1, 1], [-0.1, 0.1, 1], [0.1, -0.1, 1.5], [1, -0.1, 1.5], [1, 0, 1], [0, 0, 1]], // corner on right
+  [[1, 0.1, 1], [-0.1, 0.1, 1], [0.1, -0.1, 1.5], [0.9, -0.1, 1.5], [1, 0, 1], [0, 0, 1]] ] // both corners
+
+Roof.verts[dirN] = [	// roofs to the NORTH (south side of bldg)
+  [[0, 0.9, 1], [1, 0.9, 1], [1, 1.1, 1.5], [0, 1.1, 1.5], [0, 1, 1], [1, 1, 1]],	// no corners
+  [[-0.1, 0.9, 1], [1, 0.9, 1], [1, 1.1, 1.5], [0.1, 1.1, 1.5], [0, 1, 1], [1, 1, 1]],	// corner on left
+  [[0, 0.9, 1], [1.1, 0.9, 1], [0.9, 1.1, 1.5], [0, 1.1, 1.5], [0, 1, 1], [1, 1, 1]],	// corner on right
+  [[-0.1, 0.9, 1], [1.1, 0.9, 1], [0.9, 1.1, 1.5], [0.1, 1.1, 1.5], [0, 1, 1], [1, 1, 1]] ]	// both corners
+
+Roof.quads = [ [0, 1, 2, 3], [4, 5, 1, 0] ]
+Roof.make = function(cell, direction, cornerOnLeft, cornerOnRight)
+	result = new Roof
+	result.vertices = Roof.verts[direction][cornerOnLeft + cornerOnRight*2]
+	result.init [cell.col, cell.row, 0]
+	cell.decorations.push result
+	result.quadTexture = file.loadImage("/usr/content/textures/ToonBrickA.png")
+	return result
+end function
+
+
+
 TownLevel = new level.Level
 
 TownLevel.addGuard = function(column, row)
@@ -28,6 +67,24 @@ TownLevel.addRectBldg = function(left, bottom, width, height, doorDirs=0)
 			self.cutDoor left-1, floor(bottom + height/2), dirE
 		end if
 	end for
+	
+	for row in range(bottom, bottom+height-1)
+		cornerOnRight = (row == bottom)
+		cornerOnLeft = (row == bottom+height-1)
+		if left > 0 then Roof.make self.cells[left-1][row], dirE, cornerOnLeft, cornerOnRight
+		cornerOnLeft = (row == bottom)
+		cornerOnRight = (row == bottom+height-1)
+		Roof.make self.cells[left+width][row], dirW, cornerOnLeft, cornerOnRight
+	end for
+	for col in range(left, left + width - 1)
+		cornerOnRight = (col == left+width-1)
+		cornerOnLeft = (col == left)
+		if bottom > 0 then Roof.make self.cells[col][bottom-1], dirN, cornerOnLeft, cornerOnRight
+		cornerOnLeft = (col == left+width-1)
+		cornerOnRight = (col == left)
+		Roof.make self.cells[col][bottom+height], dirS, cornerOnLeft, cornerOnRight
+	end for
+	
 end function
 
 TownLevel.clearWalls = function(left, bottom, width, height)

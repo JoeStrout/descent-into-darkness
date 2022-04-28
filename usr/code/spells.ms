@@ -81,7 +81,6 @@ Spell.update = function(dt=0.1)
 	// check for hitting a wall
 	hitPt = self.cell.lineSegIntersect(oldPos, pos)
 	if hitPt then
-		//print "Hit wall at " + hitPt
 		self.die
 		return
 	end if

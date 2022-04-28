@@ -15,8 +15,6 @@ Wall.p = null // 2D floor points, in world coordinates: [left, right]
 Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
 Wall.alts = [file.loadImage("/usr/content/textures/SewerWallAlt.png")]
-//Wall.imageA = file.loadImage("/usr/content/textures/TestTexture.png")
-//Wall.imageB = Wall.imageA
 Wall.imageAshort = Wall.imageA.getImage(0, 0, Wall.imageA.width/10, Wall.imageA.height)
 Wall.imageBshort = Wall.imageB.getImage(0, 0, Wall.imageB.width/10, Wall.imageB.height)
 Wall.sprite = null
@@ -172,6 +170,8 @@ Doorway.typeClosedBack = 1
 Doorway.typeClosedFront = 2
 Doorway.typeOpenBack = 3
 Doorway.typeOpenFront = 4
+
+Doorway.blocksSpell = function; return self.isClosed; end function
 
 Doorway.prepImages = function
 	// get images for the wall surrounding the doorway
