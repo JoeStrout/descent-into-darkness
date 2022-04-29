@@ -1,3 +1,4 @@
+
 // This level represents the town on the surface.  It's a walled
 // town with lots of buildings and twisty little roads.
 
@@ -39,7 +40,7 @@ Roof.make = function(cell, direction, cornerOnLeft, cornerOnRight)
 	result.vertices = Roof.verts[direction][cornerOnLeft + cornerOnRight*2]
 	result.init [cell.col, cell.row, 0]
 	cell.decorations.push result
-	result.quadTexture = file.loadImage("/usr/content/textures/ToonBrickA.png")
+	result.quadTexture = file.loadImage("/usr/content/textures/ThatchedRoof.png")
 	return result
 end function
 
@@ -104,24 +105,24 @@ TownLevel.init = function
 	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
 	Wall.alts = []
-
+	
 	self.addOuterWall
 	self.addOutwardBox 0, 0, 1, 1
 	self.addOutwardBox 31, 0, 1, 1
 	self.addOutwardBox 31, 31, 1, 1
 	self.addOutwardBox 0, 31, 1, 1
-
+	
 	self.addGuard 0, 1
 	self.addGuard 30, 0
 	self.addGuard 31,30
 	self.addGuard 1, 31
-
+	
 	Wall.imageA = file.loadImage("/usr/content/textures/TownHouseWallA.png")
 	Wall.imageB = file.loadImage("/usr/content/textures/TownHouseWallB.png")
 	Wall.alts = [file.loadImage("/usr/content/textures/TownHouseWallAlt.png")]
 	wall.Doorway.prepImages
 	
-
+	
 	self.addRectBldg 15, 0, 3, 3, dirW
 	self.addRectBldg 17, 3, 3, 4, [dirW, dirN]
 	self.addRectBldg 12, 5, 3, 4, dirW
@@ -138,7 +139,7 @@ TownLevel.init = function
 	self.addRectBldg 1, 16, 5, 2, [dirN, dirE]
 	self.addRectBldg 4, 14, 2, 2, dirE
 	self.clearWalls 4, 15, 2, 2
-
+	
 	self.addRectBldg 7, 13, 2, 4, dirW
 	self.addRectBldg 15, 12, 4, 3, dirN
 	self.addRectBldg 20, 9, 3, 5, dirW
@@ -147,7 +148,7 @@ TownLevel.init = function
 	globals.pit = decorations.Pit.make(self.cells[13][2])
 	
 	self.startPos = [15, 4]
-
+	
 	Cell.fixCorners self.cells
 end function
 
