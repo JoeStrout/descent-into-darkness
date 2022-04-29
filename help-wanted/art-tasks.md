@@ -13,7 +13,8 @@ This file lists artwork-related tasks that need to be done.
 	- hedge textures (for a hedge maze?)
 
 - Dungeon: Sewer assets needed
-	- sewer floor/ceiling decorations
+	- sewer floor/ceiling decorations (cracks, subtle patch of mold, etc.)
+	- cobweb decoration (designed to go in corner)
 
 - NPCs wanted
 	- Mayor (or whatever noble would be in charge of a small walled town)

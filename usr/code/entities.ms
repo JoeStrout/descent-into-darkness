@@ -205,6 +205,7 @@ Mob.init = function(cell)
 	self.decorations.push self.main
 
 	self.startAnim self.idleSets
+	self.main.images = self.idleSets[0]
 end function
 
 Mob.startAnim = function(imageSets)
