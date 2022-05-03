@@ -27,15 +27,28 @@ Renderer.cell = lvl.cells
 camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 lvl.drawBackground
 
+jumpToLevelNum = null
+
+// Other code can call this function, even during rendering,
+// to move the player to the next level down:
 enterNextLevel = function
-	globals.currentLevelNum = currentLevelNum + 1
-	msg = "Descending to level " + currentLevelNum + "..."
+	globals.jumpToLevelNum = currentLevelNum + 1
+end function
+
+// This is the function that actually does all the work.  But it
+// is called from the main loop when jumpToLevelNum is set; other
+// code should not call it directly.
+ascendOrDescend = function
+	if jumpToLevelNum > currentLevelNum then verb = "Descending" else verb = "Ascending"
+	globals.currentLevelNum = jumpToLevelNum
+	msg = verb + " to level " + currentLevelNum + "..."
 	hud.fadeOut msg
 	entities.clearAll
 	globals.lvl = levels.get(currentLevelNum)
 	Renderer.cell = lvl.cells
 	camera.pos = [lvl.startPos[0] + 0.5, lvl.startPos[1] + 0.5, 0.6]
 	lvl.drawBackground
+	renderer.rerender
 	hud.fadeIn msg
 end function
 
@@ -185,6 +198,10 @@ while true
 		break
 	else 
 		handleInputs
+	end if
+	if jumpToLevelNum != null then
+		ascendOrDescend
+		jumpToLevelNum = null
 	end if
 	
 	dt = time - lastTimestamp
