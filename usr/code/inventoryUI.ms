@@ -31,6 +31,12 @@ gfx.fillRect left, bottom, width, height, "#E4E2CA"
 // item, up to a certain size
 ItemWell = new Bounds
 ItemWell.instances = []
+ItemWell.left = function; return self.x - self.width/2; end function
+ItemWell.right = function; return self.x + self.width/2; end function
+ItemWell.bottom = function; return self.y - self.height/2; end function
+ItemWell.top = function; return self.y + self.height/2; end function
+ItemWell.contents = null	// item, or list of items
+
 ItemWell.init = function(left, top, columns, rows)
 	self.x = left + columns*16
 	self.y = top - rows*16
@@ -38,22 +44,72 @@ ItemWell.init = function(left, top, columns, rows)
 	self.height = rows*32
 	ItemWell.instances.push self
 end function
+
 ItemWell.make = function(left, top, columns, rows)
 	result = new ItemWell
 	result.init left, top, columns, rows
 	return result
 end function
+
 ItemWell.debugDraw = function
 	display(2).drawPoly self.corners, "#FF00FF", 3
+end function
+
+ItemWell.positionItem = function(item)
+	item.x = self.x
+	item.y = self.y
+	if self.contents then dropArea.positionItem self.contents
+	self.contents = item
+	item.well = self
+end function
+
+ItemWell.removeItem = function(item)
+	if self.contents == item then self.contents = null
+	if self.contents isa map then self.contents.remove item
 end function
 
 // drop area is a special well that can hold any number of items in a heap
 // (it is used to exchange items with the environment)
 DropArea = new ItemWell
+DropArea.init = function(left, top, columns, rows)
+	super.init left, top, columns, rows
+	self.contents = {}
+end function
+
+DropArea.positionItem = function(item)
+	// Only make sure the item is in bounds
+	dx = self.left - (item.x - item.cols*16)
+	if dx > 0 then item.x = item.x + dx
+	dx = (item.x + item.cols*16) - self.right
+	if dx > 0 then item.x = item.x - dx
+	dy = self.bottom - (item.y - item.rows*16)
+	if dy > 0 then item.y = item.y + dy
+	dy = (item.y + item.cols*16) - self.top
+	if dy > 0 then item.y = item.y - dy
+	self.contents.push item
+	item.well = self
+end function
 
 // and backpack is also special: it can hold multiple items, neatly
 // organized on a grid, as long as they don't overlap
 Backpack = new ItemWell
+Backpack.init = function(left, top, columns, rows)
+	super.init left, top, columns, rows
+	self.contents = {}
+end function
+
+Backpack.positionItem = function(item)
+	// Find the nearest cell based on this item's top-left corner
+	// relative to the center of the backpack.
+	itemLeft = item.x - item.cols*16 - self.x
+	itemBotm = item.y - item.rows*16 - self.y
+	dx = round(itemLeft/32)*32 - itemLeft
+	dy = round(itemBotm/32)*32 - itemBotm
+	item.x = item.x + dx
+	item.y = item.y + dy
+	self.contents.push item
+	item.well = self
+end function
 
 // here are all the item wells in our layout:
 head = ItemWell.make(left+104, top-72, 2, 2)
@@ -75,6 +131,7 @@ backpack.init left+312, top-112, 4, 10
 // Item class: represents something that can be moved around in envintory.
 Item = new UpdatableSprite
 Item.scale = 0.5
+Item.well = null
 
 Item.init = function(filename)
 	self.image = file.loadImage("/usr/content/items/" + filename + ".png")
@@ -110,6 +167,7 @@ Item.beginGrab = function
 	outer.grabbedItem = self
 	outer.grabDx = self.x - mouse.x
 	outer.grabDy = self.y - mouse.y
+	if self.well then self.well.removeItem self
 	// move to front
 	spriteDisp.sprites.removeVal self
 	spriteDisp.sprites.push self
@@ -126,6 +184,18 @@ Item.endGrab = function
 	// move to back (of items), so you can rifle through a pile
 	spriteDisp.sprites.removeVal self
 	spriteDisp.sprites.insert backmostItemSpriteIndex, self
+	if not dropArea.overlaps(self) then self.snapToGrid
+end function
+
+Item.snapToGrid = function
+	for well in ItemWell.instances
+		if well.contains(self) then
+			well.positionItem self
+			return
+		end if
+	end for
+	// Not dropped in any well?  Put in drop area.
+	dropArea.positionItem self
 end function
 
 backmostItemSpriteIndex = spriteDisp.sprites.len
