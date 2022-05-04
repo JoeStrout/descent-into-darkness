@@ -5,3 +5,5 @@ Note that it will *not* include any commercial/licensed models (or fonts) from w
 Here are some of the file extensions you may see here:
 
 - .idraw: a document from Graphic (a Mac vector drawing app).
+- .psd: Photoshop documents
+- .ai: Illustrator documents
