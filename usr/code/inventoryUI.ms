@@ -5,6 +5,7 @@ import "miscUtil"
 ensureImport "updatable"
 ensureImport "listUtil"
 ensureImport "qa"
+ensureImport "items"
 
 // development/debugging setup
 
@@ -58,6 +59,12 @@ ItemWell.debugDraw = function
 	display(2).drawPoly self.corners, "#FF00FF", 3
 end function
 
+ItemWell.canHoldItem = function(item)
+	if item.rows > self.rows or item.cols > self.cols then return false
+	// ToDo: consider restrictions based on equipment slot
+	return true
+end function
+
 ItemWell.positionItem = function(item)
 	item.x = self.x
 	item.y = self.y
@@ -77,6 +84,10 @@ DropArea = new ItemWell
 DropArea.init = function(left, top, columns, rows)
 	super.init left, top, columns, rows
 	self.contents = []
+end function
+
+DropArea.canHoldItem = function(item)
+	return true		// drop area can hold anything
 end function
 
 DropArea.positionItem = function(item)
@@ -161,98 +172,18 @@ backpack.init left+312, top-112, 4, 10
 //	well.debugDraw
 //end for
 
-// Item class: represents something that can be moved around in envintory.
-Item = new UpdatableSprite
-Item.scale = 0.5
-Item.well = null
-Item.unusedCells = null	// list of [col,row] cells this item does NOT actually use
-
-Item.init = function(filename)
-	self.image = file.loadImage("/usr/content/items/" + filename + ".png")
-	qa.assert self.image != null
-	self.rows = round(self.image.height / 64)
-	self.cols = round(self.image.width / 64)
-	self.localBounds = new Bounds
-	self.localBounds.width = self.image.width - 4
-	self.localBounds.height = self.image.height - 4
-	self.x = dropArea.x + round(rnd*60 - 30)
-	self.y = dropArea.y + round(rnd*60 - 30)
-	spriteDisp.sprites.push self
-end function
-
-Item.make = function(filename)
-	result = new Item
-	result.init filename
-	return result
-end function
-
-Item.contains = function(point)
-	if not super.contains(point) then return false
-	if not self.unusedCells then return true
-	col = floor((point.x - self.x)/32 + self.cols/2)
-	row = self.rows-1 - floor((point.y - self.y)/32 + self.rows/2)
-	if self.unusedCells.contains([col,row]) then return false
-	return true
-end function
-
-Item.beginHover = function
-	self.scale = 0.55
-	outer.hoveredItem = self
-end function
-
-Item.endHover = function
-	self.scale = 0.5
-	if outer.hoveredItem == self then outer.hoveredItem = null
-end function
-
-Item.beginGrab = function
-	self.scale = 0.6
-	outer.grabbedItem = self
-	outer.grabDx = self.x - mouse.x
-	outer.grabDy = self.y - mouse.y
-	if self.well then self.well.removeItem self
-	// move to front
-	spriteDisp.sprites.removeVal self
-	spriteDisp.sprites.push self
-end function
-
-Item.continueGrab = function
-	self.x = mouse.x + grabDx
-	self.y = mouse.y + grabDy
-end function
-
-Item.endGrab = function
-	self.scale = 0.5
-	if outer.grabbedItem == self then outer.grabbedItem = null
-	// move to back (of items), so you can rifle through a pile
-	spriteDisp.sprites.removeVal self
-	spriteDisp.sprites.insert backmostItemSpriteIndex, self
-	if not dropArea.overlaps(self) then self.snapToGrid
-end function
-
-Item.snapToGrid = function
-	for well in ItemWell.instances
-		if well.contains(self) then
-			well.positionItem self
-			return
-		end if
-	end for
-	// Not dropped in any well?  Put in drop area.
-	dropArea.positionItem self
-end function
-
 backmostItemSpriteIndex = spriteDisp.sprites.len
-items = []
+inventory = []
 staff = Item.make("greenStaffglow")
 staff.unusedCells = [[1,0], [0,2]]
-items.push staff
+inventory.push staff
 
-items.push Item.make("dagger")
-items.push Item.make("dagger")
-items.push Item.make("redPotion")
-items.push Item.make("redPotion")
-items.push Item.make("yellowGemstone")
-items.push Item.make("yellowGemstone")
+inventory.push Item.make("dagger")
+inventory.push Item.make("dagger")
+inventory.push Item.make("redPotion")
+inventory.push Item.make("redPotion")
+inventory.push Item.make("yellowGemstone")
+inventory.push Item.make("yellowGemstone")
 
 itemUnderMouse = function
 	for i in range(spriteDisp.sprites.len - 1)
@@ -264,19 +195,18 @@ end function
 
 // state variables
 hoveredItem = null		// item mouse is hovering over
-grabbedItem = null		// item mouse is carrying around
 grabDx = 0				// position of item relative to mouse
 grabDy = 0
 
 // main (inventory) update function
 update = function
-	if grabbedItem == null then
+	if items.grabbedItem == null then
 		item = itemUnderMouse
 		if hoveredItem and item != hoveredItem then hoveredItem.endHover
 		if item and item != hoveredItem then item.beginHover
 		if item and mouse.button then item.beginGrab
 	else
-		if mouse.button then grabbedItem.continueGrab else grabbedItem.endGrab
+		if mouse.button then items.grabbedItem.continueGrab else items.grabbedItem.endGrab
 	end if
 end function
 
