@@ -27,8 +27,6 @@ right = background.x + width/2
 top = background.y + height/2
 bottom = background.y - height/2
 
-gfx.fillRect left, bottom, width, height, "#E4E2CA"
-
 // define the item wells... most of these can only hold one
 // item, up to a certain size
 ItemWell = new Bounds
@@ -59,9 +57,32 @@ ItemWell.debugDraw = function
 	display(2).drawPoly self.corners, "#FF00FF", 3
 end function
 
+// Return whether this item well can ever hold the given item,
+// based on its size and type.  Note that this function does
+// NOT consider whether the well is currently occupied (unless
+// maybe at some point we consider that it contains a cursed
+// item).  In other words, it should return true if the given
+// item can replace the current contents.
 ItemWell.canHoldItem = function(item)
 	if item.rows > self.rows or item.cols > self.cols then return false
 	// ToDo: consider restrictions based on equipment slot
+	return true
+end function
+
+// Return whether the given item can go into this well without
+// replacing an existing item.  This is used when picking stuff up.
+ItemWell.canFitItem = function(item)
+	if not self.canHoldItem(item) then return false
+	return self.contents == null
+end function
+
+// Fit the given item into this well, moving it where it should go.
+// Return true on success, false if failed.
+ItemWell.fitItem = function(item)
+	if not self.canFitItem(item) then return false
+	item.x = self.x
+	item.y = self.y
+	self.positionItem item
 	return true
 end function
 
@@ -174,16 +195,26 @@ backpack.init left+312, top-112, 4, 10
 
 backmostItemSpriteIndex = spriteDisp.sprites.len
 inventory = []
+
+// Main function to "pick up" an item, adding it to our
+// backpack if it will fit (or to some other slot, if specified
+// and currently empty).
+pickUp = function(item, optionalSlot=null)
+	inventory.push item
+	if not backpack.fitItem(item) then dropArea.positionItem item
+end function
+
+// Create our initial items:
 staff = Item.make("greenStaffglow")
 staff.unusedCells = [[1,0], [0,2]]
-inventory.push staff
+pickUp staff
 
-inventory.push Item.make("dagger")
-inventory.push Item.make("dagger")
-inventory.push Item.make("redPotion")
-inventory.push Item.make("redPotion")
-inventory.push Item.make("yellowGemstone")
-inventory.push Item.make("yellowGemstone")
+pickUp Item.make("dagger")
+pickUp Item.make("dagger")
+pickUp Item.make("redPotion")
+pickUp Item.make("redPotion")
+pickUp Item.make("yellowGemstone")
+pickUp Item.make("yellowGemstone")
 
 itemUnderMouse = function
 	for i in range(spriteDisp.sprites.len - 1)
