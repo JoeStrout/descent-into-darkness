@@ -176,7 +176,7 @@ handleInputs = function
 	end if
 	
 	mouseX = key.axis("Mouse X")
-	if mouseX != 0 then camera.turn -2 * mouseX
+	if mouseX != 0 then camera.turn -3 * mouseX
 	
 	mouseY = key.axis("Mouse Y")
 	if mouseY != 0 then
