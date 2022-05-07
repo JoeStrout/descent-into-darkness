@@ -1,24 +1,36 @@
 // This module manages the equipment/inventory UI, which allows
 // the users to see, arrange, and equip their gear.
 
+if locals == globals then
+	print "This module doesn't run on its own anymore."
+	print "Run the game, and press I instead."
+	exit
+end if
+
 import "miscUtil"
 ensureImport "updatable"
 ensureImport "listUtil"
 ensureImport "qa"
-ensureImport "items"
 
-// development/debugging setup
+// sprite display: when null, it means the inventory is not currently
+// on screen.  When non-null, it is on screen and this is the display
+// where our background and item sprites should go.
+spriteDisp = null
 
-clear
-spriteDisp = display(4)
-display(2).mode = displayMode.pixel
-display(2).clear color.clear
+addSprite = function(sprite, inBackOfOthers = false)
+	if spriteDisp != null then
+		// ToDo: handle inBackOfOthers
+		spriteDisp.sprites.push sprite
+	end if
+end function
+
+removeSprite = function(sprite)
+	if spriteDisp != null then spriteDisp.sprites.removeVal sprite
+end function
 
 background = new Sprite
 background.image = file.loadImage("/usr/content/ui/inventoryLayout.png")
-//background.image = file.loadImage("/usr/content/ui/Frame_1.png")
 background.x = 480; background.y = 320
-spriteDisp.sprites.push background
 
 width = background.image.width
 height = background.image.height
@@ -86,6 +98,8 @@ ItemWell.fitItem = function(item)
 	return true
 end function
 
+// Position the given item into this well, possibly based on where
+// it is positioned now (for wells that have multiple slots).
 ItemWell.positionItem = function(item)
 	item.x = self.x
 	item.y = self.y
@@ -94,6 +108,7 @@ ItemWell.positionItem = function(item)
 	item.well = self
 end function
 
+// Remove the given item from this well.
 ItemWell.removeItem = function(item)
 	if self.contents == item then self.contents = null
 	if self.contents isa list then self.contents.removeVal item
@@ -135,10 +150,51 @@ Backpack.init = function(left, top, columns, rows)
 	self.rowRange = range(0, rows-1)
 end function
 
+// Return whether the given item can go into this well without
+// replacing an existing item.  This is used when picking stuff up.
+// This version of the method returns the top-left [col,row] if
+// it can fit, or false (0) if not.
+Backpack.canFitItem = function(item)
+	if not self.canHoldItem(item) then return false
+	// Look for a set of rows/columns where this could fit,
+	// not obstructed by existing items.
+	for row in range(self.rows - item.rows, 0)
+		for col in range(0, self.cols - item.cols)
+			blocked = false
+			for i in range(0, item.cols-1)
+				for j in range(0, item.rows-1)
+					if item.unusedCells and item.unusedCells.contains([i,j]) then continue
+					if self.contents[col+i][row+j] then
+						blocked = true
+						break
+					end if
+				end for
+				if blocked then break
+			end for
+			if not blocked then return [col, row]
+		end for
+	end for
+	return false
+end function
+
+// Fit the given item into this well, moving it where it should go.
+// Return true on success, false if failed.
+Backpack.fitItem = function(item)
+	fittingPlace = self.canFitItem(item)
+	if not fittingPlace then return false
+	item.x = self.left + fittingPlace[0]*32 + item.cols*16
+	item.y = self.top - fittingPlace[1]*32 - item.rows*16
+	self.positionItem item
+	return true
+end function
+
 Backpack.removeItem = function(item)
 	for i in self.colRange
 		for j in self.rowRange
-			if self.contents[i][j] == item then self.contents[i][j] == null
+			if self.contents[i][j] == item then
+				self.contents[i][j] = null
+				
+			end if
 		end for
 	end for
 end function
@@ -193,8 +249,7 @@ backpack.init left+312, top-112, 4, 10
 //	well.debugDraw
 //end for
 
-backmostItemSpriteIndex = spriteDisp.sprites.len
-inventory = []
+globals.inventory = []
 
 // Main function to "pick up" an item, adding it to our
 // backpack if it will fit (or to some other slot, if specified
@@ -204,19 +259,8 @@ pickUp = function(item, optionalSlot=null)
 	if not backpack.fitItem(item) then dropArea.positionItem item
 end function
 
-// Create our initial items:
-staff = Item.make("greenStaffglow")
-staff.unusedCells = [[1,0], [0,2]]
-pickUp staff
-
-pickUp Item.make("dagger")
-pickUp Item.make("dagger")
-pickUp Item.make("redPotion")
-pickUp Item.make("redPotion")
-pickUp Item.make("yellowGemstone")
-pickUp Item.make("yellowGemstone")
-
 itemUnderMouse = function
+	if spriteDisp == null then return null
 	for i in range(spriteDisp.sprites.len - 1)
 		sp = spriteDisp.sprites[i]
 		if sp isa Item and sp.contains(mouse) then return sp
@@ -241,8 +285,28 @@ update = function
 	end if
 end function
 
-while true
-	update
-	updatable.update
-	yield
-end while
+// Present the inventory UI, and run its own main loop until the
+// user dismisses it.
+presentModal = function
+	outer.spriteDisp = display(4)
+	display(2).mode = displayMode.pixel
+	display(2).clear color.clear
+	spriteDisp.sprites.push background
+	for item in inventory
+		spriteDisp.sprites.push item
+	end for
+	
+	key.clear
+	while true
+		if key.available then
+			k = key.get
+			if k == char(3) or k == char(13) or k == char(27) or k == "i" then
+				break
+			end if
+		end if
+		update		
+		updatable.update
+		yield
+	end while
+end function
+

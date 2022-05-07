@@ -9,6 +9,7 @@ ensureImport "listUtil"
 grabbedItem = null		// item mouse is carrying around
 
 globals.Item = new UpdatableSprite
+Item.name = "item"
 Item.scale = 0.5
 Item.well = null
 Item.unusedCells = null	// list of [col,row] cells this item does NOT actually use
@@ -21,9 +22,9 @@ Item.init = function(filename)
 	self.localBounds = new Bounds
 	self.localBounds.width = self.image.width - 4
 	self.localBounds.height = self.image.height - 4
-	self.x = dropArea.x + round(rnd*60 - 30)
-	self.y = dropArea.y + round(rnd*60 - 30)
-	spriteDisp.sprites.push self
+	self.x = inventoryUI.dropArea.x + round(rnd*60 - 30)
+	self.y = inventoryUI.dropArea.y + round(rnd*60 - 30)
+	self.name = filename
 end function
 
 Item.make = function(filename)
@@ -58,8 +59,8 @@ Item.beginGrab = function
 	outer.grabDy = self.y - mouse.y
 	if self.well then self.well.removeItem self
 	// move to front
-	spriteDisp.sprites.removeVal self
-	spriteDisp.sprites.push self
+	inventoryUI.removeSprite self
+	inventoryUI.addSprite self
 end function
 
 Item.continueGrab = function
@@ -70,14 +71,13 @@ end function
 Item.endGrab = function
 	self.scale = 0.5
 	if outer.grabbedItem == self then outer.grabbedItem = null
-	// move to back (of items), so you can rifle through a pile
-	spriteDisp.sprites.removeVal self
-	spriteDisp.sprites.insert backmostItemSpriteIndex, self
+	inventoryUI.removeSprite self
+	inventoryUI.addSprite self, true	// move to back (of items)
 	self.dropInWell
 end function
 
 Item.dropInWell = function
-	for well in ItemWell.instances
+	for well in inventoryUI.ItemWell.instances
 		if well.canHoldItem(self) and well.contains(self) then
 			well.positionItem self
 			return
