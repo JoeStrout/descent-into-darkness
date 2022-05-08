@@ -185,6 +185,11 @@ FlatDecal.setScale = function(scale)
 	self.updateCorners
 end function
 
+FlatDecal.setPos = function(pos)
+	self.pos = pos
+	self.updateCorners
+end function
+
 FlatDecal.updateCorners = function
 	x = self.pos[0]
 	y = self.pos[1]

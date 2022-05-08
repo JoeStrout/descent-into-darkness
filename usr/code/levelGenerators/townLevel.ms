@@ -45,7 +45,6 @@ Roof.make = function(cell, direction, cornerOnLeft, cornerOnRight)
 end function
 
 
-
 TownLevel = new level.Level
 
 TownLevel.addGuard = function(column, row)
@@ -76,6 +75,21 @@ TownLevel.addRectBldg = function(left, bottom, width, height, doorDirs=0)
 		cornerOnLeft = (row == bottom)
 		cornerOnRight = (row == bottom+height-1)
 		Roof.make self.cells[left+width][row], dirW, cornerOnLeft, cornerOnRight
+		
+		// add ceiling to every cell inside the building
+		for col in range(left, left + width - 1)
+			// We're going to actually add FOUR celiing decorations to each tile.
+			// This works around the culling problem, and avoids distortions that
+			// occur when you stretch a really huge sprite at certain angles.
+			ceiling = FlatDecal.make("CeilingTile.png", self.cells[col][row], 0.5)
+			ceiling.setPos [col+0.25, row+0.25, 1]
+			ceiling = FlatDecal.make("CeilingTile.png", self.cells[col][row], 0.5)
+			ceiling.setPos [col+0.25, row+0.75, 1]
+			ceiling = FlatDecal.make("CeilingTile.png", self.cells[col][row], 0.5)
+			ceiling.setPos [col+0.75, row+0.75, 1]
+			ceiling = FlatDecal.make("CeilingTile.png", self.cells[col][row], 0.5)
+			ceiling.setPos [col+0.75, row+0.25, 1]			
+		end for
 	end for
 	for col in range(left, left + width - 1)
 		cornerOnRight = (col == left+width-1)
@@ -85,7 +99,7 @@ TownLevel.addRectBldg = function(left, bottom, width, height, doorDirs=0)
 		cornerOnRight = (col == left)
 		Roof.make self.cells[col][bottom+height], dirS, cornerOnLeft, cornerOnRight
 	end for
-	
+		
 end function
 
 TownLevel.clearWalls = function(left, bottom, width, height)
