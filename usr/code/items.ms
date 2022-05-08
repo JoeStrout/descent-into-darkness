@@ -99,6 +99,13 @@ UsableItem.make = function(filename)
 	return result
 end function
 
+Food = new UsableItem
+Food.make = function(filename)
+	result = new Food
+	result.init filename
+	return result
+end function
+
 Ring = new UsableItem
 Ring.equipType = "ring"
 Ring.make = function(filename="goldRing")

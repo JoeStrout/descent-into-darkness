@@ -26,6 +26,7 @@ player.initialize = function
 	inventoryUI.pickUp Item.make("yellowGemstone")
 	inventoryUI.pickUp items.Ring.make
 	inventoryUI.pickUp items.Boots.make
+	inventoryUI.pickUp items.Food.make("apple")
 end function
 
 player.gainXP = function(dXP)
