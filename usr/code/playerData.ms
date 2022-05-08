@@ -1,6 +1,7 @@
 ensureImport "hud"
 ensureImport "sounds"
 ensureImport "mathUtil"
+ensureImport "inventoryUI"
 
 globals.player = {}
 player.name = "PLAYER NAME"
@@ -10,6 +11,20 @@ player.stamina = 100
 player.level = 0
 player.xp = 0
 player.gold = 0
+
+player.initialize = function
+	// Create our initial items:
+	staff = Item.make("greenStaffglow")
+	staff.unusedCells = [[1,0], [0,2]]
+	inventoryUI.pickUp staff
+
+	inventoryUI.pickUp Item.make("dagger")
+	inventoryUI.pickUp Item.make("dagger")
+	inventoryUI.pickUp Item.make("redPotion")
+	inventoryUI.pickUp Item.make("redPotion")
+	inventoryUI.pickUp Item.make("yellowGemstone")
+	inventoryUI.pickUp Item.make("yellowGemstone")
+end function
 
 player.gainXP = function(dXP)
 	self.xp = self.xp + dXP

@@ -6,6 +6,9 @@ import "renderer"
 import "levels"
 import "spells"
 import "sounds"
+import "items"
+import "inventoryUI"
+import "playerData"
 clear
 import "hud"
 
@@ -21,6 +24,8 @@ display(2).mode = displayMode.pixel
 display(2).color = color.fuchsia
 display(2).clear color.clear
 
+
+player.initialize
 
 lvl = levels.get(currentLevelNum)
 Renderer.cell = lvl.cells
@@ -148,6 +153,14 @@ showMap = function
 	display(1).mode = displayMode.text
 end function
 
+showInventory = function
+	while key.pressed("i"); yield; end while
+	key.clear
+	inventoryUI.presentModal
+	while key.pressed("i") or key.pressed("escape"); yield; end while
+	key.clear
+end function
+
 wasActionDown = false
 wasFireDown = false
 handleInputs = function
@@ -163,7 +176,7 @@ handleInputs = function
 	end if
 	
 	mouseX = key.axis("Mouse X")
-	if mouseX != 0 then camera.turn -2 * mouseX
+	if mouseX != 0 then camera.turn -3 * mouseX
 	
 	mouseY = key.axis("Mouse Y")
 	if mouseY != 0 then
@@ -183,7 +196,7 @@ handleInputs = function
 	outer.wasFireDown = fireDown
 	
 	if key.pressed("m") then showMap
-	
+	if key.pressed("i") then showInventory
 end function
 
 //setup timestamp variables
