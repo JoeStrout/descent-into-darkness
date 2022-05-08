@@ -13,6 +13,7 @@ Item.name = "item"
 Item.scale = 0.5
 Item.well = null
 Item.unusedCells = null	// list of [col,row] cells this item does NOT actually use
+Item.equipType = null	// which equipment slot type this item can be used in
 
 Item.init = function(filename)
 	self.image = file.loadImage("/usr/content/items/" + filename + ".png")
@@ -44,12 +45,12 @@ end function
 
 Item.beginHover = function
 	self.scale = 0.55
-	outer.hoveredItem = self
+	inventoryUI.hoveredItem = self
 end function
 
 Item.endHover = function
 	self.scale = 0.5
-	if outer.hoveredItem == self then outer.hoveredItem = null
+	if inventoryUI.hoveredItem == self then inventoryUI.hoveredItem = null
 end function
 
 Item.beginGrab = function
@@ -84,5 +85,49 @@ Item.dropInWell = function
 		end if
 	end for
 	// Not dropped in any well?  Put in drop area.
-	dropArea.positionItem self
+	inventoryUI.dropArea.positionItem self
 end function
+
+//----------------------------------------------------------------------
+// Subclasses for specific kinds of items
+
+// UsableItem: any Item that can be equipped or used.
+UsableItem = new Item
+UsableItem.make = function(filename)
+	result = new UsableItem
+	result.init filename
+	return result
+end function
+
+Ring = new UsableItem
+Ring.equipType = "ring"
+Ring.make = function(filename="goldRing")
+	result = new Ring
+	result.init filename
+	return result
+end function
+
+Boots = new UsableItem
+Boots.equipType = "boots"
+Boots.make = function(filename="darkBrownBoots")
+	result = new Boots
+	result.init filename
+	return result
+end function
+
+Headgear = new UsableItem
+Headgear.equipType = "headgear"
+Headgear.make = function(filename)
+	result = new Headgear
+	result.init filename
+	return result
+end function
+
+Garment = new UsableItem		// (specifically, chest covering)
+Garment.equipType = "garment"
+Garment.make = function(filename)
+	result = new Garment
+	result.init filename
+	return result
+end function
+

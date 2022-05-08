@@ -19,7 +19,14 @@ spriteDisp = null
 
 addSprite = function(sprite, inBackOfOthers = false)
 	if spriteDisp != null then
-		// ToDo: handle inBackOfOthers
+		if inBackOfOthers then
+			for i in spriteDisp.sprites.indexes
+				if spriteDisp.sprites[i] isa Item then
+					spriteDisp.sprites.insert i, sprite
+					return
+				end if
+			end for
+		end if
 		spriteDisp.sprites.push sprite
 	end if
 end function
@@ -48,6 +55,7 @@ ItemWell.right = function; return self.x + self.width/2; end function
 ItemWell.bottom = function; return self.y - self.height/2; end function
 ItemWell.top = function; return self.y + self.height/2; end function
 ItemWell.contents = null	// item, or list of items
+ItemWell.equipType = ""		// which equipment type this well supports
 
 ItemWell.init = function(left, top, columns, rows)
 	self.cols = columns
@@ -77,7 +85,7 @@ end function
 // item can replace the current contents.
 ItemWell.canHoldItem = function(item)
 	if item.rows > self.rows or item.cols > self.cols then return false
-	// ToDo: consider restrictions based on equipment slot
+	if self.equipType then return item.equipType == self.equipType
 	return true
 end function
 
@@ -234,14 +242,27 @@ end function
 
 // here are all the item wells in our layout:
 head = ItemWell.make(left+104, top-72, 2, 2)
+head.equipType = "headgear"
+
 chest = ItemWell.make(left+112, top-152, 2, 3)
+chest.equipType = "garment"
+
 mainItem = ItemWell.make(left+24, top-184, 2, 3)
+
 offItem = ItemWell.make(left+216, top-216, 2, 2)
+
 rightRing = ItemWell.make(left+32, top-320, 1, 1)
+rightRing.equipType = "ring"
+
 leftRing = ItemWell.make(left+224, top-320, 1, 1)
+leftRing.equipType = "ring"
+
 boots = ItemWell.make(left+136, top-408, 2, 2)
+boots.equipType = "boots"
+
 dropArea = new DropArea
 dropArea.init left+496, top-352, 4, 4
+
 backpack = new Backpack
 backpack.init left+312, top-112, 4, 10
 

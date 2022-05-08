@@ -20,10 +20,12 @@ player.initialize = function
 
 	inventoryUI.pickUp Item.make("dagger")
 	inventoryUI.pickUp Item.make("dagger")
-	inventoryUI.pickUp Item.make("redPotion")
-	inventoryUI.pickUp Item.make("redPotion")
+	inventoryUI.pickUp items.UsableItem.make("redPotion")
+	inventoryUI.pickUp items.UsableItem.make("redPotion")
 	inventoryUI.pickUp Item.make("yellowGemstone")
 	inventoryUI.pickUp Item.make("yellowGemstone")
+	inventoryUI.pickUp items.Ring.make
+	inventoryUI.pickUp items.Boots.make
 end function
 
 player.gainXP = function(dXP)
