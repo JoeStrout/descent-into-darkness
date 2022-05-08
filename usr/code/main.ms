@@ -156,7 +156,9 @@ end function
 showInventory = function
 	while key.pressed("i"); yield; end while
 	key.clear
+	inventoryUI.dropArea.pickUpFromWorld
 	inventoryUI.presentModal
+	inventoryUI.dropArea.dropIntoWorld
 	while key.pressed("i") or key.pressed("escape"); yield; end while
 	key.clear
 end function

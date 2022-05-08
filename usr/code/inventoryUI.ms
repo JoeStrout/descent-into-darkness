@@ -73,10 +73,6 @@ ItemWell.make = function(left, top, columns, rows)
 	return result
 end function
 
-ItemWell.debugDraw = function
-	display(2).drawPoly self.corners, "#FF00FF", 3
-end function
-
 // Return whether this item well can ever hold the given item,
 // based on its size and type.  Note that this function does
 // NOT consider whether the well is currently occupied (unless
@@ -146,6 +142,31 @@ DropArea.positionItem = function(item)
 	if dy > 0 then item.y = item.y - dy
 	self.contents.push item
 	item.well = self
+end function
+
+DropArea.pickUpFromWorld = function
+	cell = lvl.cells[camera.pos[0]][camera.pos[1]]
+	for i in cell.decorations.reverseIndexes
+		dec = cell.decorations[i]
+		if not dec isa decorations.ItemPickup then continue
+		dec.sprite.scale = 0.5
+		self.positionItem dec.sprite
+		cell.decorations.remove i
+		display(4).sprites.removeVal dec.sprite
+	end for
+end function
+
+// Drop our contents into the world as decorations.
+DropArea.dropIntoWorld = function
+	if not self.contents then return
+	cell = lvl.cells[camera.pos[0]][camera.pos[1]]
+	for item in self.contents
+		// create an ItemPickup for each one, but since the player is
+		// purposely dropping these things, do not auto-pick them up again
+		decorations.ItemPickup.make item, cell, false
+		item.well = null
+	end for
+	self.contents = []
 end function
 
 // and backpack is also special: it can hold multiple items, neatly
@@ -266,20 +287,9 @@ dropArea.init left+496, top-352, 4, 4
 backpack = new Backpack
 backpack.init left+312, top-112, 4, 10
 
-//for well in ItemWell.instances
-//	well.debugDraw
-//end for
-
 globals.inventory = []
 
-// Main function to "pick up" an item, adding it to our
-// backpack if it will fit (or to some other slot, if specified
-// and currently empty).
-pickUp = function(item, optionalSlot=null)
-	inventory.push item
-	if not backpack.fitItem(item) then dropArea.positionItem item
-end function
-
+// Find the item (in the inventory UI) which the mouse is over.
 itemUnderMouse = function
 	if spriteDisp == null then return null
 	for i in range(spriteDisp.sprites.len - 1)
@@ -287,6 +297,14 @@ itemUnderMouse = function
 		if sp isa Item and sp.contains(mouse) then return sp
 	end for
 	return null
+end function
+
+// Main function to "pick up" an item, adding it to our
+// backpack if it will fit (or to some other slot, if specified
+// and currently empty).
+pickUp = function(item, optionalSlot=null)
+	inventory.push item
+	if not backpack.fitItem(item) then dropArea.positionItem item
 end function
 
 // state variables
@@ -309,9 +327,9 @@ end function
 // Present the inventory UI, and run its own main loop until the
 // user dismisses it.
 presentModal = function
-	outer.spriteDisp = display(4)
-	display(2).mode = displayMode.pixel
-	display(2).clear color.clear
+	display(2).mode = displayMode.sprite
+	outer.spriteDisp = display(2)
+	spriteDisp.clear
 	spriteDisp.sprites.push background
 	for item in inventory
 		spriteDisp.sprites.push item
@@ -329,5 +347,8 @@ presentModal = function
 		updatable.update
 		yield
 	end while
+	spriteDisp.clear
+	outer.spriteDisp = null
+	display(2).mode = displayMode.pixel
 end function
 

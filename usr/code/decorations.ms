@@ -69,6 +69,22 @@ Billboard.drawInMap = function(left, bottom, scaleX=20, scaleY=20)
 end function
 
 //---------------------------------------------------------------
+// ItemPickup: a billboard that represents an item in the world,
+// which you can pick up by walking over it (unless you've 
+// specifically dropped it).
+ItemPickup = new Billboard
+ItemPickup.autoPickup = true
+ItemPickup.make = function(item, cell, autoPickup=true)
+	result = new ItemPickup
+	result.init [cell.col + mathUtil.randRange(0.4, 0.6),
+	  cell.row + mathUtil.randRange(0.4, 0.6), 0.1], 0.25
+	result.sprite = item
+	if not autoPickup then result.autoPickup=false
+	cell.decorations.push result
+	return result
+end function
+
+//---------------------------------------------------------------
 // TextFloater: a billboard made from text, that floats upwards
 // and fades out after a second or two.  This is typically used
 // to show damage or other effects when you hit an entity.
