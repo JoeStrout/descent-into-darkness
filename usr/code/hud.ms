@@ -103,9 +103,10 @@ update = function
 	
 	textDisp.color = color.silver
 	textDisp.print "Health: "
-	if player.health > 70 then
+	healthPct = 100 * player.health / player.maxHealth
+	if healthPct > 70 then
 		textDisp.color = color.lime
-	else if player.health > 30 then
+	else if healthPct > 30 then
 		textDisp.color = color.yellow
 	else
 		textDisp.color = color.red
