@@ -338,6 +338,42 @@ pickUp = function(item, optionalSlot=null)
 	if not backpack.fitItem(item) then dropArea.positionItem item
 end function
 
+print = function(s, x, y)
+	statDisp.print s, x, y, color.yellow, "small"
+end function
+
+printCentered = function(s, x, y, underline=false)
+	statDisp.print s, x - s.len*4, y, color.yellow, "small"
+	if underline then
+		statDisp.line x - s.len*4, y-2, x + s.len*4, y-2, color.yellow
+	end if
+end function
+
+drawStats = function
+	r = new Bounds
+	r.width = 140
+	r.x = right - 28 - r.width/2
+	r.height = 230
+	r.y = top - 74 - r.height/2
+	statDisp.fillRect r.left, r.bottom, r.width, r.height, color.clear
+	//statDisp.drawRect r.left, r.bottom, r.width, r.height, color.gray
+	y = r.top - 20
+	x = r.left
+	print "HEALTH: " + player.health + " / " + player.maxHealth, x, y; y = y - 20
+	print "MANA:   " + player.mana + " / " + player.maxMana, x, y; y = y - 20
+	print "MANA REGEN:  " + player.manaRegen, x, y; y = y - 20
+	print "SPELL POWER: " + player.damage, x, y; y = y - 20
+	print "TOUGHNESS:   " + player.toughness, x, y; y = y - 20
+	y = y - 20
+	printCentered "Elemental", r.x, y; y = y - 20
+	printCentered " Strength ", r.x, y, true
+	y = y - 24; x = r.x - 12*4
+	print "FIRE:      " + player.elemFire, x, y; y = y - 20
+	print "COLD:      " + player.elemCold, x, y; y = y - 20
+	print "INFECTION: " + player.elemInfect, x, y; y = y - 20
+	
+end function
+
 // state variables
 hoveredItem = null		// item mouse is hovering over
 grabDx = 0				// position of item relative to mouse
@@ -366,6 +402,11 @@ presentModal = function
 		spriteDisp.sprites.push item
 	end for
 	
+	display(1).mode = displayMode.pixel
+	outer.statDisp = display(1)
+	statDisp.clear color.clear
+	drawStats
+	
 	key.clear
 	while true
 		if key.available then
@@ -381,5 +422,6 @@ presentModal = function
 	spriteDisp.clear
 	outer.spriteDisp = null
 	display(2).mode = displayMode.pixel
+	display(1).mode = displayMode.text
 end function
 

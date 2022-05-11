@@ -31,6 +31,12 @@ for kv in Updatable
 	UpdatableSprite[kv.key] = @kv.value
 end for
 
+Bounds.left = function; return self.x - self.width/2; end function
+Bounds.top = function; return self.y + self.height/2; end function
+Bounds.right = function; return self.x + self.width/2; end function
+Bounds.bottom = function; return self.y - self.height/2; end function
+
+
 // function to update them all!
 update = function(dt=0.016)
 	// We do the following loop very carefully, in case

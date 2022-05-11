@@ -8,7 +8,13 @@ player.name = "PLAYER NAME"
 player.health = 80
 player.maxHealth = 100
 player.mana = 100
-player.stamina = 100
+player.maxMana = 100
+player.damage = 10		// affects how much damage offensive spells do
+player.manaRegen = 10	// affects how quickly mana regenerates
+player.toughness = 10	// reduces damage from physical attacks
+player.elemFire = 0		// bonus/penalty in fire attacks
+player.elemCold = 0		// bonus/penalty in cold attacks
+player.elemInfect = 0	// bonus/penalty in infection attacks
 player.level = 0
 player.xp = 0
 player.gold = 0
@@ -27,6 +33,9 @@ player.initialize = function
 	inventoryUI.pickUp Item.make("yellowGemstone")
 	inventoryUI.pickUp items.Ring.make
 	inventoryUI.pickUp items.Boots.make
+	inventoryUI.pickUp items.Boots.make("shoes")
+	inventoryUI.pickUp items.Garment.make("blueRobe")
+	inventoryUI.pickUp items.Headgear.make("headpiece")	
 	inventoryUI.pickUp items.Food.make("apple")
 end function
 
