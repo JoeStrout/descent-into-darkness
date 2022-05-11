@@ -5,7 +5,8 @@ ensureImport "inventoryUI"
 
 globals.player = {}
 player.name = "PLAYER NAME"
-player.health = 100
+player.health = 80
+player.maxHealth = 100
 player.mana = 100
 player.stamina = 100
 player.level = 0
@@ -20,8 +21,8 @@ player.initialize = function
 
 	inventoryUI.pickUp Item.make("dagger")
 	inventoryUI.pickUp Item.make("dagger")
-	inventoryUI.pickUp items.UsableItem.make("redPotion")
-	inventoryUI.pickUp items.UsableItem.make("redPotion")
+	inventoryUI.pickUp items.Drink.make("redPotion")
+	inventoryUI.pickUp items.Drink.make("redPotion")
 	inventoryUI.pickUp Item.make("yellowGemstone")
 	inventoryUI.pickUp Item.make("yellowGemstone")
 	inventoryUI.pickUp items.Ring.make
@@ -46,6 +47,12 @@ player.takeDamage = function(damage)
 		sounds.grunt.play mathUtil.lerp(0.5, 1, damage/20), 0, 0.8 + 0.4*rnd
 	end if
 	if self.health <= 0 then self.die
+end function
+
+player.gainHealth = function(benefit)
+	self.health = self.health + benefit
+	if self.health > self.maxHealth then self.health = self.maxHealth
+	hud.update
 end function
 
 player.die = function

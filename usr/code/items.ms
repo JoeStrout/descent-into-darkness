@@ -14,6 +14,8 @@ Item.scale = 0.5
 Item.well = null
 Item.unusedCells = null	// list of [col,row] cells this item does NOT actually use
 Item.equipType = null	// which equipment slot type this item can be used in
+Item.useVerb = null		// verb describing how this item is used, or null if not usable
+Item.use = null
 
 Item.init = function(filename)
 	self.image = file.loadImage("/usr/content/items/" + filename + ".png")
@@ -32,6 +34,15 @@ Item.make = function(filename)
 	result = new Item
 	result.init filename
 	return result
+end function
+
+Item.destroy = function
+	inventory.removeVal self
+	if inventoryUI.spriteDisp then
+		inventoryUI.spriteDisp.sprites.removeVal self
+	end if
+	if self.well then self.well.removeItem self
+	self.well = null
 end function
 
 Item.contains = function(point)
@@ -54,6 +65,7 @@ Item.endHover = function
 end function
 
 Item.beginGrab = function
+	self.pickupPos = [self.x, self.y]; self.pickupWell = self.well
 	self.scale = 0.6
 	outer.grabbedItem = self
 	outer.grabDx = self.x - mouse.x
@@ -93,20 +105,51 @@ end function
 
 // UsableItem: any Item that can be equipped or used.
 UsableItem = new Item
+UsableItem.useVerb = "Use"
 UsableItem.make = function(filename)
 	result = new UsableItem
 	result.init filename
 	return result
 end function
 
-Food = new UsableItem
+Consumable = new UsableItem
+Consumable.useVerb = "Consume"
+Consumable.sound = sounds.munch
+Consumable.healthBenefit = 10
+Consumable.use = function
+	if self.sound then self.sound.play
+	player.gainHealth self.healthBenefit
+	self.destroy
+end function
+
+Food = new Consumable
+Food.useVerb = "Eat"
+Food.sound = sounds.munch
 Food.make = function(filename)
 	result = new Food
 	result.init filename
 	return result
 end function
 
-Ring = new UsableItem
+Drink = new Consumable
+Drink.useVerb = "Drink"
+Drink.sound = sounds.gulp
+Drink.healthBenefit = 50
+Drink.make = function(filename)
+	result = new Drink
+	result.init filename
+	return result
+end function
+
+Equipment = new UsableItem
+Equipment.useVerb = "Equip"
+Equipment.make = function(filename="goldRing")
+	result = new Equipment
+	result.init filename
+	return result
+end function
+
+Ring = new Equipment
 Ring.equipType = "ring"
 Ring.make = function(filename="goldRing")
 	result = new Ring
@@ -114,7 +157,7 @@ Ring.make = function(filename="goldRing")
 	return result
 end function
 
-Boots = new UsableItem
+Boots = new Equipment
 Boots.equipType = "boots"
 Boots.make = function(filename="darkBrownBoots")
 	result = new Boots
@@ -122,7 +165,7 @@ Boots.make = function(filename="darkBrownBoots")
 	return result
 end function
 
-Headgear = new UsableItem
+Headgear = new Equipment
 Headgear.equipType = "headgear"
 Headgear.make = function(filename)
 	result = new Headgear
@@ -130,7 +173,7 @@ Headgear.make = function(filename)
 	return result
 end function
 
-Garment = new UsableItem		// (specifically, chest covering)
+Garment = new Equipment		// (specifically, chest covering)
 Garment.equipType = "garment"
 Garment.make = function(filename)
 	result = new Garment

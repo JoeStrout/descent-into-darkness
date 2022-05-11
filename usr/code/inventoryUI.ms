@@ -169,6 +169,34 @@ DropArea.dropIntoWorld = function
 	self.contents = []
 end function
 
+// Use are: similar to drop area, but causes us to use the object right away
+// (and then puts it back where it came from).
+UseArea = new ItemWell
+UseArea.init = function(left, top, columns=4, rows=2)
+	self.cols = 4
+	self.rows = 2
+	self.x = left + columns*16
+	self.y = top - rows*16
+	self.width = columns*32
+	self.height = rows*32
+	ItemWell.instances.push self
+end function
+
+UseArea.canHoldItem = function(item)
+	if item.useVerb then return true else return false
+end function
+
+UseArea.positionItem = function(item)
+	item.use
+	if spriteDisp.sprites.indexOf(item) != null then
+		// item was not consumed, so put it back where it came from
+		item.x = item.pickupPos[0]
+		item.y = item.pickupPos[1]
+		item.pickupWell.positionItem item
+	end if
+	self.contents = null
+end function
+
 // and backpack is also special: it can hold multiple items, neatly
 // organized on a grid, as long as they don't overlap
 Backpack = new ItemWell
@@ -284,8 +312,11 @@ boots.equipType = "boots"
 dropArea = new DropArea
 dropArea.init left+496, top-352, 4, 4
 
+useArea = new UseArea
+useArea.init left+312, top-422, 4, 2
+
 backpack = new Backpack
-backpack.init left+312, top-112, 4, 10
+backpack.init left+312, top-80, 4, 10
 
 globals.inventory = []
 
