@@ -74,7 +74,7 @@ TownLevel.addRectBldg = function(left, bottom, width, height, doorDirs=0)
 		if left > 0 then Roof.make self.cells[left-1][row], dirE, cornerOnLeft, cornerOnRight
 		cornerOnLeft = (row == bottom)
 		cornerOnRight = (row == bottom+height-1)
-		Roof.make self.cells[left+width][row], dirW, cornerOnLeft, cornerOnRight
+		if left+width < self.cols then Roof.make self.cells[left+width][row], dirW, cornerOnLeft, cornerOnRight
 		
 		// add ceiling to every cell inside the building
 		for col in range(left, left + width - 1)
@@ -136,7 +136,7 @@ TownLevel.init = function
 	Wall.alts = [file.loadImage("/usr/content/textures/TownHouseWallAlt.png")]
 	wall.Doorway.prepImages
 	
-	
+	// southwest quarter
 	self.addRectBldg 15, 0, 3, 3, dirW
 	self.addRectBldg 17, 3, 3, 4, [dirW, dirN]
 	self.addRectBldg 12, 5, 3, 4, dirW
@@ -156,13 +156,23 @@ TownLevel.init = function
 	
 	self.addRectBldg 7, 13, 2, 4, dirW
 	self.addRectBldg 15, 12, 4, 3, dirN
-	self.addRectBldg 20, 9, 3, 5, dirW
-	
-	
+
 	globals.pit = decorations.Pit.make(self.cells[13][2])
-	
 	self.startPos = [15, 4]
 	
+	// southeast quarter
+	self.addRectBldg 20, 9, 3, 5, dirW
+	self.addRectBldg 21, 6, 5, 3, [dirN, dirW]
+	self.addRectBldg 21, 2, 3, 2, dirN
+	self.addRectBldg 24, 0, 4, 2, dirN
+	self.addRectBldg 25, 3, 2, 2, dirW
+	self.addRectBldg 28, 3, 4, 4, [dirW, dirN]
+	self.addRectBldg 27, 8, 4, 3, [dirS, dirE]
+	self.addRectBldg 24, 11, 5, 2, dirN
+	self.addRectBldg 30, 12, 2, 4, dirW
+	self.addRectBldg 17, 16, 7, 2, dirS
+	self.addRectBldg 24, 14, 2, 4, [dirN, dirE]
+	self.addRectBldg 26, 17, 5, 2, dirS
 	Cell.fixCorners self.cells
 end function
 
