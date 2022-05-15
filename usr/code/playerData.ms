@@ -31,24 +31,10 @@ player.xp = 0
 player.gold = 0
 
 player.initialize = function
-	// Create our initial items:
-	staff = Item.make("greenStaffglow")
-	staff.unusedCells = [[1,0], [0,2]]
-	staff.stats.damage = 3
-	inventoryUI.pickUp staff
-
-	inventoryUI.pickUp Item.make("dagger")
-	inventoryUI.pickUp Item.make("dagger")
-	inventoryUI.pickUp items.HealthPotion.make
-	inventoryUI.pickUp items.HealthPotion.make
-	inventoryUI.pickUp Item.make("yellowGemstone")
-	inventoryUI.pickUp Item.make("yellowGemstone")
-	inventoryUI.pickUp items.ManaRing.make
-	inventoryUI.pickUp items.Boots.make
-	inventoryUI.pickUp items.Boots.make("shoes")
-	inventoryUI.pickUp items.Garment.make("blueRobe")
-	inventoryUI.pickUp items.Headgear.make("headpiece")	
-	inventoryUI.pickUp items.Food.make("apple")
+	// Create our initial items, at random:
+	for i in range(3)
+		inventoryUI.pickUp items.randomLoot(0)
+	end for
 	
 	self.updateStats
 end function

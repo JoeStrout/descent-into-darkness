@@ -7,8 +7,9 @@ import "mazeGenerator"
 
 MazeLevel = new level.Level
 
-MazeLevel.init = function
-
+MazeLevel.init = function(depth=0)
+	self.depth = depth
+	
 	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
 	Wall.alts = [file.loadImage("/usr/content/textures/SewerWallAlt.png")]

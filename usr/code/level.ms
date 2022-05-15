@@ -13,6 +13,7 @@ ensureImport "decorations"
 ensureImport "qa"
 
 Level = {}
+Level.depth = 0			// 0 for surface, 1 for first dungeon level, etc.
 Level.cols = 32
 Level.rows = 32
 Level.cells = null		// 2D array of Cell
@@ -20,7 +21,8 @@ Level.startPos = [2,2]
 
 // init method: set up (load or generate) this level.
 // Subclasses should override this.
-Level.init = function
+Level.init = function(depth=0)
+	self.depth = depth
 	self.clear
 	self.startPos = [2,2]
 end function
@@ -182,6 +184,15 @@ end function
 // Add an inward-facing wall around the edge of the map.
 Level.addOuterWall = function
 	self.addInwardBox 0, 0, self.cols, self.rows
+end function
+
+// Add a random loot item within a rectangular area
+Level.addLoot = function(left, bottom, width, height)
+	item = items.randomLoot(self.depth)
+	if item == null then return
+	col = floor(left + rnd * width)
+	row = floor(bottom + rnd * height)
+	decorations.ItemPickup.make item, self.cells[col][row]
 end function
 
 // Draw this level to gfx in the given rectangular area.

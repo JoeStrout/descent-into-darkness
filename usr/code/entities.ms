@@ -103,7 +103,7 @@ Entity.hitBySpell = function(spell)
 	if not self.main.sprite.overlaps(spell.billboard.sprite) then return false
 	// We've been hit by this spell!
 	self.playSound sounds.hit
-	damage = 5
+	damage = player.stats.damage
 	tf = decorations.TextFloater.make(self.cell, self.pos.plus([0,0,0.25]),
 	    "-" + damage, color.red)
 	self.health = self.health - damage
@@ -364,6 +364,12 @@ Mob.die = function
 	splat.updateCorners
 	splat.sprite.tint = self.splatTint
 	player.gainXP self.xp
+	
+	if rnd < 0.5 then
+		loot = items.randomLoot
+		pickup = decorations.ItemPickup.make(loot, self.cell)
+		pickup.pos = self.pos
+	end if
 end function
 
 //---------------------------------------------------------------

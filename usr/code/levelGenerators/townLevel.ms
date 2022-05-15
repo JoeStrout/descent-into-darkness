@@ -99,7 +99,8 @@ TownLevel.addRectBldg = function(left, bottom, width, height, doorDirs=0)
 		cornerOnRight = (col == left)
 		Roof.make self.cells[col][bottom+height], dirS, cornerOnLeft, cornerOnRight
 	end for
-		
+	
+	if rnd < 0.1 then self.addLoot left, bottom, width, height
 end function
 
 TownLevel.clearWalls = function(left, bottom, width, height)
@@ -113,8 +114,8 @@ TownLevel.clearWalls = function(left, bottom, width, height)
 	end for
 end function
 
-TownLevel.init = function
-	super.init
+TownLevel.init = function(depth=0)
+	super.init depth
 	
 	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")

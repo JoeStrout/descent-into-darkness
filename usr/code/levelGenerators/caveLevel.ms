@@ -17,8 +17,8 @@ end function
 
 CaveLevel = new level.Level
 
-CaveLevel.init = function
-	super.init
+CaveLevel.init = function(depth=0)
+	super.init depth
 
 	// ToDo: get a nice cave wall texture!
 	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")

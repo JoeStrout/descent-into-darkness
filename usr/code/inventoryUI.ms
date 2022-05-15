@@ -153,8 +153,10 @@ DropArea.pickUpFromWorld = function
 	for i in cell.decorations.reverseIndexes
 		dec = cell.decorations[i]
 		if not dec isa decorations.ItemPickup then continue
-		dec.sprite.scale = 0.5
-		self.positionItem dec.sprite
+		item = dec.sprite
+		inventory.push item
+		item.scale = 0.5
+		self.positionItem item
 		cell.decorations.remove i
 		display(4).sprites.removeVal dec.sprite
 	end for

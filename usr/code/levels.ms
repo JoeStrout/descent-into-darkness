@@ -34,7 +34,7 @@ get = function(depth = -1)
 	levelclass = locals[filename][className]
 	globals[className] = levelclass
 	lvl = new levelclass
-	lvl.init
+	lvl.init depth
 	file.setdir olddir
 	return lvl
 end function

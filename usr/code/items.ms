@@ -106,14 +106,26 @@ end function
 //----------------------------------------------------------------------
 // Subclasses for specific kinds of items
 
+// Treasure
+YellowGem = new Item
+YellowGem.make = function; r = new YellowGem; r.init "yellowGemstone"; return r; end function
+
+
 // UsableItem: any Item that can be equipped or used.
 UsableItem = new Item
 UsableItem.useVerb = "Use"
-UsableItem.make = function(filename)
-	result = new UsableItem
-	result.init filename
-	return result
-end function
+
+// Weapons/staves/wands
+
+Dagger = new UsableItem
+Dagger.make = function;	r = new Dagger; r.init "dagger"; return r; end function
+
+Staff = new UsableItem
+Staff.unusedCells = [[1,0], [0,2]]
+Staff.stats = new Stats; Staff.stats.damage = 3
+Staff.make = function;	r = new Staff; r.init "greenStaffglow"; return r; end function
+
+// Food and drink
 
 Consumable = new UsableItem
 Consumable.useVerb = "Consume"
@@ -131,82 +143,68 @@ Food.useVerb = "Eat"
 Food.sound = sounds.munch
 Food.stats = new Stats
 Food.stats.health = 1
-Food.make = function(filename)
-	result = new Food
-	result.init filename
-	return result
-end function
+
+Apple = new Food
+Apple.make = function;	r = new Apple; r.init "apple"; return r; end function
 
 Drink = new Consumable
 Drink.useVerb = "Drink"
 Drink.sound = sounds.gulp
-Drink.make = function(filename)
-	result = new Drink
-	result.init filename
-	return result
-end function
 
 HealthPotion = new Drink
 HealthPotion.stats = new Stats
 HealthPotion.stats.health = 8
-HealthPotion.make = function
-	result = new HealthPotion
-	result.init "redPotion"
-	return result
-end function
+HealthPotion.make = function; r = new HealthPotion; r.init "redPotion"; return r; end function
+
+// Rings
 
 Equipment = new UsableItem
 Equipment.useVerb = "Equip"
-Equipment.make = function(filename="goldRing")
-	result = new Equipment
-	result.init filename
-	return result
-end function
 
 Ring = new Equipment
 Ring.equipType = "ring"
-Ring.make = function(filename="goldRing")
-	result = new Ring
-	result.init filename
-	return result
-end function
+Ring.make = function(filename="goldRing"); r = new Ring; r.init filename;	return r; end function
 
 ManaRing = new Ring
 ManaRing.stats = new Stats
 ManaRing.stats.manaRegen = 1
-ManaRing.make = function
-	result = new ManaRing
-	result.init "goldRing"
-	return result
-end function
+ManaRing.make = function; r = new ManaRing; r.init "goldRing"; return r; end function
+
+// Footgear
 
 Boots = new Equipment
 Boots.equipType = "boots"
 Boots.stats = new Stats
 Boots.stats.toughness = 1
-Boots.make = function(filename="darkBrownBoots")
-	result = new Boots
-	result.init filename
-	return result
-end function
+Boots.make = function; r = new Boots; r.init "shoes"; return r; end function
+
+// Headgear
 
 Headgear = new Equipment
 Headgear.equipType = "headgear"
 Headgear.stats = new Stats
 Headgear.stats.maxMana = 3
-Headgear.make = function(filename)
-	result = new Headgear
-	result.init filename
-	return result
-end function
+
+Hood = new Headgear
+Hood.make = function; r = new Hood; r.init "headpiece"; return r; end function
+
+// Clothing/armor
 
 Garment = new Equipment		// (specifically, chest covering)
 Garment.equipType = "garment"
 Garment.stats = new Stats
 Garment.stats.elemCold = 1
-Garment.make = function(filename)
-	result = new Garment
-	result.init filename
-	return result
-end function
 
+BlueRobe = new Garment
+BlueRobe.make = function; r = new BlueRobe; r.init "blueRobe"; return r; end function
+
+// Random loot: return some item that would be found just lying around
+// on the floor in the given level (number).  (Remember that level 0
+// is the surface town.)
+randomLoot = function(level=1)
+	options = [@YellowGem.make, @Dagger.make, @Staff.make,
+	  @Apple.make, @HealthPotion.make,
+	  @ManaRing.make, @Boots.make, @Hood.make, @BlueRobe.make]
+	f = options.any
+	return f
+end function

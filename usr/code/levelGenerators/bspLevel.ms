@@ -16,8 +16,8 @@ end function
 
 BspLevel = new level.Level
 
-BspLevel.init = function
-	super.init
+BspLevel.init = function(depth=0)
+	super.init depth
 
 	Wall.imageA = file.loadImage("/usr/content/textures/SewerWallA.png")
 	Wall.imageB = file.loadImage("/usr/content/textures/SewerWallB.png")
@@ -213,6 +213,9 @@ BspLevel.digRoom = function(left, bottom, width, height)
 	self.possiblePits.push roomCells.any
 	// Set the start pos here (only the last one will stick).
 	self.startPos = [round(left+width/2), round(bottom+height/2)]
+
+	// Occasionally add some random loot.
+	if rnd < 0.1 then self.addLoot left, bottom, width, height
 
 	self.nextRoomID = self.nextRoomID + 1
 end function
