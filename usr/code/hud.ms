@@ -98,12 +98,17 @@ fadeIn = function(msg="")
 end function
 
 update = function
+	if inventoryUI.visible then		// (currently can't do both at once)
+		inventoryUI.drawStats
+		return
+	end if
+	
 	display(1).mode = displayMode.text
 	textDisp.row = 25; textDisp.column = 3
 	
 	textDisp.color = color.silver
 	textDisp.print "Health: "
-	healthPct = 100 * player.health / player.maxHealth
+	healthPct = 100 * player.stats.health / player.stats.maxHealth
 	if healthPct > 70 then
 		textDisp.color = color.lime
 	else if healthPct > 30 then
@@ -111,7 +116,7 @@ update = function
 	else
 		textDisp.color = color.red
 	end if
-	textDisp.print str(player.health).pad(6)
+	textDisp.print str(player.stats.health).pad(6)
 	textDisp.color = color.silver
 	textDisp.print "XP: " + str(player.xp).pad(6)
 	textDisp.print "Coins: "
@@ -138,7 +143,7 @@ if locals == globals then
 			k = key.get
 			if k == char(27) then break
 			if k == " " then
-				player.health = player.health - 5
+				player.stats.health = player.stats.health - 5
 				showPain
 			end if
 		end if

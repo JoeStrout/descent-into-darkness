@@ -5,6 +5,7 @@
 import "miscUtil"
 ensureImport "updatable"
 ensureImport "listUtil"
+ensureImport "stats"
 
 grabbedItem = null		// item mouse is carrying around
 
@@ -16,6 +17,7 @@ Item.unusedCells = null	// list of [col,row] cells this item does NOT actually u
 Item.equipType = null	// which equipment slot type this item can be used in
 Item.useVerb = null		// verb describing how this item is used, or null if not usable
 Item.use = null
+Item.stats = null		// effect of this item when equipped or used
 
 Item.init = function(filename)
 	self.image = file.loadImage("/usr/content/items/" + filename + ".png")
@@ -28,6 +30,7 @@ Item.init = function(filename)
 	self.x = inventoryUI.dropArea.x + round(rnd*60 - 30)
 	self.y = inventoryUI.dropArea.y + round(rnd*60 - 30)
 	self.name = filename
+	if self.stats == null then self.stats = new Stats
 end function
 
 Item.make = function(filename)
@@ -115,16 +118,19 @@ end function
 Consumable = new UsableItem
 Consumable.useVerb = "Consume"
 Consumable.sound = sounds.munch
-Consumable.healthBenefit = 10
 Consumable.use = function
 	if self.sound then self.sound.play
-	player.gainHealth self.healthBenefit
+	// consumables apply instant benefits to certain stats
+	player.gainHealth self.stats.health
+	player.gainMana self.stats.mana
 	self.destroy
 end function
 
 Food = new Consumable
 Food.useVerb = "Eat"
 Food.sound = sounds.munch
+Food.stats = new Stats
+Food.stats.health = 1
 Food.make = function(filename)
 	result = new Food
 	result.init filename
@@ -134,10 +140,18 @@ end function
 Drink = new Consumable
 Drink.useVerb = "Drink"
 Drink.sound = sounds.gulp
-Drink.healthBenefit = 50
 Drink.make = function(filename)
 	result = new Drink
 	result.init filename
+	return result
+end function
+
+HealthPotion = new Drink
+HealthPotion.stats = new Stats
+HealthPotion.stats.health = 8
+HealthPotion.make = function
+	result = new HealthPotion
+	result.init "redPotion"
 	return result
 end function
 
@@ -157,8 +171,19 @@ Ring.make = function(filename="goldRing")
 	return result
 end function
 
+ManaRing = new Ring
+ManaRing.stats = new Stats
+ManaRing.stats.manaRegen = 1
+ManaRing.make = function
+	result = new ManaRing
+	result.init "goldRing"
+	return result
+end function
+
 Boots = new Equipment
 Boots.equipType = "boots"
+Boots.stats = new Stats
+Boots.stats.toughness = 1
 Boots.make = function(filename="darkBrownBoots")
 	result = new Boots
 	result.init filename
@@ -167,6 +192,8 @@ end function
 
 Headgear = new Equipment
 Headgear.equipType = "headgear"
+Headgear.stats = new Stats
+Headgear.stats.maxMana = 3
 Headgear.make = function(filename)
 	result = new Headgear
 	result.init filename
@@ -175,6 +202,8 @@ end function
 
 Garment = new Equipment		// (specifically, chest covering)
 Garment.equipType = "garment"
+Garment.stats = new Stats
+Garment.stats.elemCold = 1
 Garment.make = function(filename)
 	result = new Garment
 	result.init filename

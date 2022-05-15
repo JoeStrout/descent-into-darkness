@@ -110,12 +110,16 @@ ItemWell.positionItem = function(item)
 	if self.contents then dropArea.positionItem self.contents
 	self.contents = item
 	item.well = self
+	player.updateStats
+	if visible then drawStats
 end function
 
 // Remove the given item from this well.
 ItemWell.removeItem = function(item)
 	if self.contents == item then self.contents = null
 	if self.contents isa list then self.contents.removeVal item
+	player.updateStats
+	if visible then drawStats
 end function
 
 // drop area is a special well that can hold any number of items in a heap
@@ -320,6 +324,8 @@ backpack.init left+312, top-80, 4, 10
 
 globals.inventory = []
 
+equipmentSlots = [head, chest, mainItem, offItem, leftRing, rightRing, boots]
+
 // Find the item (in the inventory UI) which the mouse is over.
 itemUnderMouse = function
 	if spriteDisp == null then return null
@@ -359,19 +365,18 @@ drawStats = function
 	//statDisp.drawRect r.left, r.bottom, r.width, r.height, color.gray
 	y = r.top - 20
 	x = r.left
-	print "HEALTH: " + player.health + " / " + player.maxHealth, x, y; y = y - 20
-	print "MANA:   " + player.mana + " / " + player.maxMana, x, y; y = y - 20
-	print "MANA REGEN:  " + player.manaRegen, x, y; y = y - 20
-	print "SPELL POWER: " + player.damage, x, y; y = y - 20
-	print "TOUGHNESS:   " + player.toughness, x, y; y = y - 20
+	print "HEALTH: " + player.stats.health + " / " + player.stats.maxHealth, x, y; y = y - 20
+	print "MANA:   " + player.stats.mana + " / " + player.stats.maxMana, x, y; y = y - 20
+	print "MANA REGEN:  " + player.stats.manaRegen, x, y; y = y - 20
+	print "SPELL POWER: " + player.stats.damage, x, y; y = y - 20
+	print "TOUGHNESS:   " + player.stats.toughness, x, y; y = y - 20
 	y = y - 20
 	printCentered "Elemental", r.x, y; y = y - 20
 	printCentered " Strength ", r.x, y, true
 	y = y - 24; x = r.x - 12*4
-	print "FIRE:      " + player.elemFire, x, y; y = y - 20
-	print "COLD:      " + player.elemCold, x, y; y = y - 20
-	print "INFECTION: " + player.elemInfect, x, y; y = y - 20
-	
+	print "FIRE:      " + player.stats.elemFire, x, y; y = y - 20
+	print "COLD:      " + player.stats.elemCold, x, y; y = y - 20
+	print "INFECTION: " + player.stats.elemInfect, x, y; y = y - 20	
 end function
 
 // state variables
@@ -425,3 +430,7 @@ presentModal = function
 	display(1).mode = displayMode.text
 end function
 
+// visible: return whether the inventory UI is currently displayed.
+visible = function
+	return spriteDisp != null
+end function
