@@ -104,10 +104,10 @@ update = function
 	end if
 	
 	display(1).mode = displayMode.text
-	textDisp.row = 25; textDisp.column = 3
+	textDisp.row = 25; textDisp.column = 0
 	
 	textDisp.color = color.silver
-	textDisp.print "Health: "
+	textDisp.print "HP: "
 	healthPct = 100 * player.stats.health / player.stats.maxHealth
 	if healthPct > 70 then
 		textDisp.color = color.lime
@@ -116,19 +116,23 @@ update = function
 	else
 		textDisp.color = color.red
 	end if
-	textDisp.print str(player.stats.health).pad(6)
+	textDisp.print str(player.stats.health).pad(5)
 	textDisp.color = color.silver
-	textDisp.print "XP: " + str(player.xp).pad(6)
+	textDisp.print "Mana: "
+	textDisp.color = "#AAAAFF"
+	textDisp.print str(floor(player.stats.mana)).pad(5)
+	textDisp.color = color.silver
+	textDisp.print "XP: " + str(player.xp).pad(5)
 	textDisp.print "Coins: "
-	textDisp.color = "#FFFF88"; textDisp.print str(player.gold).pad(6)
+	textDisp.color = "#FFFF88"; textDisp.print str(player.gold).pad(5)
 	textDisp.color = color.silver
-	textDisp.print "Depth: " + str(currentLevelNum).pad(6)
+	textDisp.print "Depth: " + str(currentLevelNum).pad(5)
 	camDir = miscUtil.closestDir(camera.angle)
 	textDisp.print miscUtil.dirString(camDir).pad(8)
 	
 	textDisp.color = color.gray
-	textDisp.column = 60
-	textDisp.print ("    " + round(fps) + " FPS")[-8:]
+	textDisp.column = 62
+	textDisp.print ("    " + round(fps) + " FPS")[-6:]
 end function
 
 if locals == globals then

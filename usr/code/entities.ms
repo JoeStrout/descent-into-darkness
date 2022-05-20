@@ -13,7 +13,7 @@ kAttacking = "Attacking"
 // Entity class: represents things that can move around
 // in the game.  Typically these consist of an Imposter
 // for whatever it is, and a FlatDecal for the shadow.
-Entity = new updatable.Updatable
+Entity = new Updatable
 Entity.pos = null				// [x,y,z] position of the main
 Entity.decorations = null		// list of parts we need to move around
 Entity.shadow = null			// decoration representing the shadow

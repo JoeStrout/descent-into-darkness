@@ -4,7 +4,7 @@
 // list of all active updatables:
 all = []
 
-Updatable = {}
+globals.Updatable = {}
 Updatable.init = function
 	all.push self
 end function

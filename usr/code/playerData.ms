@@ -4,8 +4,9 @@ ensureImport "mathUtil"
 ensureImport "inventoryUI"
 ensureImport "stats"
 ensureImport "mapUtil"
+ensureImport "updatable"
 
-globals.player = {}
+globals.player = new Updatable
 player.name = "PLAYER NAME"
 
 // Base stats: what the player has inherently, i.e. without the
@@ -30,7 +31,9 @@ player.level = 0
 player.xp = 0
 player.gold = 0
 
-player.initialize = function
+player.init = function
+	super.init
+	
 	// Create our initial items, at random:
 	for i in range(3)
 		inventoryUI.pickUp items.randomLoot(0)
@@ -39,6 +42,15 @@ player.initialize = function
 	self.updateStats
 end function
 
+player.update = function(dt)
+	// regenerate mana
+	if self.baseStats.mana < self.stats.maxMana then
+		inc = self.stats.manaRegen * dt
+		self.baseStats.mana = mathUtil.clamp(self.baseStats.mana + inc, 0, self.stats.maxMana)
+	end if
+end function
+
+// UpdateStats: recalculate our current stats due to equipped items.
 player.updateStats = function
 	player.stats = new player.baseStats
 	for slot in inventoryUI.equipmentSlots
@@ -87,6 +99,10 @@ player.gainMana = function(benefit)
 	if self.baseStats.mana > self.baseStats.maxHealth then self.baseStats.mana = self.baseStats.maxHealth
 	if self.stats.mana > self.stats.maxHealth then self.stats.mana = self.stats.maxHealth
 	hud.update
+end function
+
+player.useMana = function(spent)
+	self.baseStats.mana = self.baseStats.mana - spent
 end function
 
 player.die = function

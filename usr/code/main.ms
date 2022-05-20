@@ -25,7 +25,7 @@ display(2).color = color.fuchsia
 display(2).clear color.clear
 
 
-player.initialize
+player.init
 
 lvl = levels.get(currentLevelNum)
 Renderer.cell = lvl.cells

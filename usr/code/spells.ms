@@ -7,7 +7,8 @@ ensureImport "images"
 ensureImport "renderer"
 ensureImport "updatable"
 
-Spell = new updatable.Updatable
+Spell = new Updatable
+Spell.manaCost = 3
 Spell.pos = null		// [x,y,z] vector
 Spell.billboard = null
 Spell.velocity = null	// [x,y,z] vector
@@ -104,6 +105,13 @@ end function
 // and direction.
 cast = function
 	sp = new Spell
+	if sp.manaCost > player.stats.mana then
+		// Not enough mana!
+		// ToDo: play a sad sound and make some sparks or something.
+		return
+	end if
+	player.useMana sp.manaCost
+	
 	forward = renderer.camera.forwardVec
 	startPos = renderer.camera.pos[:]
 	startPos[2] = startPos[2] - 0.2
